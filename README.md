@@ -15,10 +15,19 @@ go install github.com/mmilanovic4/orbx@latest
 ## 📦 Usage
 
 ```bash
-orbx list
 orbx clearclip
+orbx ip
+orbx dns example.com
+orbx port 3000
+orbx ping google.com
+orbx serve 8080
+orbx xkcd
 ```
 
 ## 🔧 Requirements
 
 - Go 1.20+
+
+```
+
+```
