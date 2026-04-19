@@ -14,7 +14,6 @@ var clearclipCmd = &cobra.Command{
 	GroupID: "system",
 	Run: func(cmd *cobra.Command, args []string) {
 		switch runtime.GOOS {
-
 		case "darwin":
 			// macOS
 			cmd := exec.Command("pbcopy")
@@ -23,7 +22,6 @@ var clearclipCmd = &cobra.Command{
 				fmt.Println("error clearing clipboard:", err)
 				return
 			}
-
 		case "linux":
 			// Linux (X11)
 			cmd := exec.Command("bash", "-c", "echo -n | xclip -selection clipboard")
@@ -31,7 +29,6 @@ var clearclipCmd = &cobra.Command{
 				fmt.Println("error clearing clipboard (xclip missing?):", err)
 				return
 			}
-
 		default:
 			fmt.Println("unsupported OS:", runtime.GOOS)
 			return

@@ -18,7 +18,7 @@ go install github.com/mmilanovic4/orbx@latest
 orbx clearclip
 orbx ip
 orbx dns example.com
-orbx port 3000
+orbx ports 3000
 orbx ping google.com
 orbx serve 8080
 orbx xkcd

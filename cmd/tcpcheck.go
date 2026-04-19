@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var tcpCmd = &cobra.Command{
-	Use:     "tcp [host:port]",
+var tcpcheckCmd = &cobra.Command{
+	Use:     "tcpcheck [host:port]",
 	Short:   "Check TCP port connectivity",
 	GroupID: "network",
 	Args:    cobra.ExactArgs(1),
@@ -33,5 +33,5 @@ var tcpCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(tcpCmd)
+	rootCmd.AddCommand(tcpcheckCmd)
 }

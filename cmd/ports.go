@@ -10,8 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var portCmd = &cobra.Command{
-	Use:     "port [number]",
+var portsCmd = &cobra.Command{
+	Use:     "ports [port]",
 	Short:   "Show processes using network ports",
 	GroupID: "dev",
 	Args:    cobra.ExactArgs(1),
@@ -53,5 +53,5 @@ var portCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(portCmd)
+	rootCmd.AddCommand(portsCmd)
 }
