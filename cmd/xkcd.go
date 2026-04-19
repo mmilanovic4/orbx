@@ -17,10 +17,10 @@ type XKCD struct {
 }
 
 var xkcdCmd = &cobra.Command{
-	Use:   "xkcd",
-	Short: "Fetch latest XKCD comic",
+	Use:     "xkcd",
+	Short:   "Fetch latest XKCD comic",
+	GroupID: "content",
 	Run: func(cmd *cobra.Command, args []string) {
-
 		resp, err := http.Get("https://xkcd.com/info.0.json")
 		if err != nil {
 			fmt.Println("Error:", err)

@@ -14,13 +14,12 @@ var showVersion bool
 var rootCmd = &cobra.Command{
 	Use:   "orbx",
 	Short: "System utility CLI",
-	Long:  `orbx is a lightweight CLI utility for quick system tasks.`,
+	Long:  "orbx is a lightweight CLI utility for quick system tasks.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if showVersion {
 			fmt.Println("orbx", VERSION)
 			return
 		}
-
 		cmd.Help()
 	},
 }
@@ -33,6 +32,30 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.CompletionOptions.DisableDefaultCmd = true
+	// Version flag
 	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "show version")
+
+	// 🧠 System Tools
+	rootCmd.AddGroup(&cobra.Group{
+		ID:    "system",
+		Title: "🧠 System Tools",
+	})
+
+	// 🌐 Network Tools
+	rootCmd.AddGroup(&cobra.Group{
+		ID:    "network",
+		Title: "🌐 Network Tools",
+	})
+
+	// 💻 Developer Tools
+	rootCmd.AddGroup(&cobra.Group{
+		ID:    "dev",
+		Title: "💻 Developer Tools",
+	})
+
+	// 📦 Content Tools
+	rootCmd.AddGroup(&cobra.Group{
+		ID:    "content",
+		Title: "📦 Content Tools",
+	})
 }

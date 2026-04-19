@@ -9,8 +9,9 @@ import (
 )
 
 var clearclipCmd = &cobra.Command{
-	Use:   "clearclip",
-	Short: "Clear system clipboard",
+	Use:     "clearclip",
+	Short:   "Clear system clipboard",
+	GroupID: "system",
 	Run: func(cmd *cobra.Command, args []string) {
 		switch runtime.GOOS {
 

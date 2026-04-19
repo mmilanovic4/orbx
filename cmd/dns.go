@@ -8,14 +8,15 @@ import (
 )
 
 var dnsCmd = &cobra.Command{
-	Use:   "dns [domain]",
-	Short: "Resolve DNS records for a domain",
+	Use:     "dns [domain]",
+	Short:   "Resolve DNS records for a domain",
+	GroupID: "network",
 	Run: func(cmd *cobra.Command, args []string) {
 		domain := args[0]
 
 		fmt.Println("Resolving:", domain)
 
-		// 🌐 A records
+		// A records
 		ips, err := net.LookupIP(domain)
 		if err != nil {
 			fmt.Println("Error:", err)
@@ -27,7 +28,7 @@ var dnsCmd = &cobra.Command{
 			fmt.Println(" ", ip)
 		}
 
-		// 📧 MX records
+		// MX records
 		mxRecords, err := net.LookupMX(domain)
 		if err == nil && len(mxRecords) > 0 {
 			fmt.Println("\nMX records:")

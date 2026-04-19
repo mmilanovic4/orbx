@@ -10,10 +10,11 @@ import (
 )
 
 var ipCmd = &cobra.Command{
-	Use:   "ip",
-	Short: "Show public and local IP addresses",
+	Use:     "ip",
+	Short:   "Show public and local IP addresses",
+	GroupID: "network",
 	Run: func(cmd *cobra.Command, args []string) {
-		// 🌍 PUBLIC IP
+		// Public IP
 		resp, err := http.Get("https://api.ipify.org")
 		if err != nil {
 			fmt.Println("Failed to get public IP:", err)
@@ -23,6 +24,7 @@ var ipCmd = &cobra.Command{
 			fmt.Println("Public IP:", string(body))
 		}
 
+		// Local IPs
 		fmt.Println("\nLocal IPs:")
 		interfaces, err := net.Interfaces()
 		if err != nil {
