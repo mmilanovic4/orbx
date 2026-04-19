@@ -11,9 +11,10 @@ var listCmd = &cobra.Command{
 	Short: "Shows all available commands",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("orbx commands:")
-		fmt.Println("clearclip			clear system clipboard")
-		fmt.Println("list						show available commands")
-		fmt.Println("version				show version")
+
+		for _, c := range cmd.Root().Commands() {
+			fmt.Printf("  %-12s %s\n", c.Name(), c.Short)
+		}
 	},
 }
 
