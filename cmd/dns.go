@@ -27,11 +27,13 @@ var dnsCmd = &cobra.Command{
 		case "MX":
 			// MX records
 			mxRecords, err := net.LookupMX(domain)
-			if err == nil && len(mxRecords) > 0 {
-				fmt.Println("\nMX records:")
-				for _, mx := range mxRecords {
-					fmt.Printf("  %s (priority %d)\n", mx.Host, mx.Pref)
-				}
+			if err != nil {
+				fmt.Println("Error:", err)
+				return
+			}
+			fmt.Println("\nMX records:")
+			for _, mx := range mxRecords {
+				fmt.Printf("  %s (priority %d)\n", mx.Host, mx.Pref)
 			}
 		case "CNAME":
 			// CNAME record
@@ -45,7 +47,7 @@ var dnsCmd = &cobra.Command{
 		case "TXT":
 			// TXT records
 			txtRecords, err := net.LookupTXT(domain)
-			if err != nil && len(txtRecords) > 0 {
+			if err == nil {
 				fmt.Println("Error:", err)
 				return
 			}
