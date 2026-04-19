@@ -7,7 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var version string = "v0.1.0"
+const VERSION string = "v0.1.0"
+
 var showVersion bool
 
 var rootCmd = &cobra.Command{
@@ -16,7 +17,7 @@ var rootCmd = &cobra.Command{
 	Long:  `orbx is a lightweight CLI utility for quick system tasks.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if showVersion {
-			fmt.Println("orbx", version)
+			fmt.Println("orbx", VERSION)
 			return
 		}
 

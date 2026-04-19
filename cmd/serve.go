@@ -10,7 +10,7 @@ import (
 )
 
 var serveCmd = &cobra.Command{
-	Use:   "serve",
+	Use:   "serve [port]",
 	Short: "Start a static file server in current directory",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
