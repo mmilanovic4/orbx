@@ -6,14 +6,12 @@ orbx is a lightweight CLI utility for quick system tasks.
 
 ## ⚡ Install
 
-### Build locally
-
 ```bash
 go build -o orbx
 sudo mv orbx /usr/local/bin/
 ```
 
-## Usage
+## 📦 Usage
 
 ```bash
 orbx list
