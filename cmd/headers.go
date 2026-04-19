@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var httpCmd = &cobra.Command{
-	Use:     "http [url]",
+var headersCmd = &cobra.Command{
+	Use:     "headers [url]",
 	Short:   "Show HTTP response status and headers",
 	GroupID: "network",
 	Args:    cobra.ExactArgs(1),
@@ -47,5 +47,5 @@ var httpCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(httpCmd)
+	rootCmd.AddCommand(headersCmd)
 }
