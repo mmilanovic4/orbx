@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"encoding/hex"
 	"fmt"
 	"orbx/internal/encodingutil"
 
@@ -35,8 +34,7 @@ var hashCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println(hex.EncodeToString(hash))
-
+		fmt.Println(encodingutil.EncodeHex(hash))
 	},
 }
 

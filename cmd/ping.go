@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"net/http"
-	"strings"
+	"orbx/internal/netutil"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -17,12 +17,7 @@ var pingCmd = &cobra.Command{
 	GroupID: "network",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		url := args[0]
-
-		// ensure scheme exists
-		if !strings.HasPrefix(url, "http") {
-			url = "https://" + url
-		}
+		url := netutil.NormalizeURL(args[0])
 
 		client := &http.Client{
 			Timeout: 3 * time.Second,
