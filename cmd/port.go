@@ -2,33 +2,53 @@ package cmd
 
 import (
 	"fmt"
-	"net"
-	"time"
+	"orbx/internal/netutil"
+	"os/exec"
+	"strconv"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
 
 var portCmd = &cobra.Command{
-	Use:     "port [host:port]",
-	Short:   "Check TCP port connectivity",
-	GroupID: "network",
+	Use:     "port [number]",
+	Short:   "Show processes using network ports",
+	GroupID: "dev",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		target := args[0]
-
-		start := time.Now()
-
-		conn, err := net.DialTimeout("tcp", target, 2*time.Second)
-		latency := time.Since(start)
-
+		port, err := netutil.ParsePort(args[0])
 		if err != nil {
-			fmt.Printf("FAIL %s (%s)\n", target, latency)
+			fmt.Println(err)
 			return
 		}
 
-		defer conn.Close()
+		out, err := exec.Command("lsof", "-iTCP", "-sTCP:LISTEN", "-n", "-P").Output()
+		if err != nil {
+			fmt.Println("error:", err)
+			return
+		}
 
-		fmt.Printf("OK   %s (%s)\n", target, latency)
+		lines := strings.Split(string(out), "\n")
+
+		var found []string
+		var keyword string = ":" + strconv.Itoa(port)
+
+		for _, line := range lines {
+			if strings.Contains(line, keyword+" ") || strings.Contains(line, keyword+"\n") {
+				found = append(found, line)
+			}
+		}
+
+		if len(found) == 0 {
+			fmt.Printf("🟢 Port %d is open.\n", port)
+			return
+		}
+
+		fmt.Printf("🔴 Port %d is in use:\n", port)
+
+		for _, line := range found {
+			fmt.Println(line)
+		}
 	},
 }
 

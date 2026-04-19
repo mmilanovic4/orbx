@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"net/http"
+	"orbx/internal/netutil"
 	"os"
 	"strconv"
 
@@ -15,18 +16,9 @@ var serveCmd = &cobra.Command{
 	GroupID: "dev",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		portStr := args[0]
-
-		// strict parse
-		port, err := strconv.Atoi(portStr)
+		port, err := netutil.ParsePort(args[0])
 		if err != nil {
-			fmt.Println("Invalid port:", portStr)
-			return
-		}
-
-		// valid port range
-		if port < 1 || port > 65535 {
-			fmt.Println("Port must be between 1 and 65535")
+			fmt.Println(err)
 			return
 		}
 
@@ -37,11 +29,11 @@ var serveCmd = &cobra.Command{
 		}
 
 		fmt.Println("Serving:", dir)
-		fmt.Println("On: http://localhost:" + portStr)
+		fmt.Printf("On: http://localhost:%d\n", port)
 
 		fs := http.FileServer(http.Dir(dir))
 
-		err = http.ListenAndServe(":"+portStr, fs)
+		err = http.ListenAndServe(":"+strconv.Itoa(port), fs)
 		if err != nil {
 			fmt.Println("Server error:", err)
 		}
