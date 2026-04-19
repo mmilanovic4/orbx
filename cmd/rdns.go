@@ -16,6 +16,12 @@ var rdnsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ip := strings.TrimSpace(args[0])
 
+		// strict parse
+		if net.ParseIP(ip) == nil {
+			fmt.Println("Invalid IP address")
+			return
+		}
+
 		names, err := net.LookupAddr(ip)
 		if err != nil {
 			fmt.Println("Error:", err)

@@ -17,7 +17,7 @@ var serveCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		portStr := args[0]
 
-		// strict parse (no stripping)
+		// strict parse
 		port, err := strconv.Atoi(portStr)
 		if err != nil {
 			fmt.Println("Invalid port:", portStr)
