@@ -1,0 +1,17 @@
+# Binaries
+orbx
+*.exe
+
+# Go build output
+/bin/
+/dist/
+
+# OS files
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Go modules cache (optional safety)
+vendor/
