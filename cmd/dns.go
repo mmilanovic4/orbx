@@ -11,6 +11,7 @@ var dnsCmd = &cobra.Command{
 	Use:     "dns [domain]",
 	Short:   "Resolve DNS records for a domain",
 	GroupID: "network",
+	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		domain := args[0]
 
