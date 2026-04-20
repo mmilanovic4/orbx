@@ -27,7 +27,3 @@ orbx xkcd
 ## 🔧 Requirements
 
 - Go 1.20+
-
-```
-
-```
