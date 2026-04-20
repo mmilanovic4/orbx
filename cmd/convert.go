@@ -65,6 +65,9 @@ var groups = map[string]UnitGroup{
 var tempUnits = map[string]bool{"c": true, "f": true, "k": true}
 var tempOrder = []string{"c", "f", "k"}
 
+// Ordered by decreasing length to avoid prefix collisions during unit matching (e.g. "mb" matching "m")
+var allUnits = []string{"week", "day", "min", "tb", "gb", "mb", "kb", "in", "cm", "ft", "km", "mi", "ms", "oz", "lb", "kg", "b", "m", "g", "h", "s", "c", "f", "k"}
+
 func convertTemp(value float64, from, to string) (float64, bool) {
 	if !tempUnits[from] || !tempUnits[to] {
 		return 0, false
@@ -122,9 +125,6 @@ func convert(value float64, from, to string) (float64, bool) {
 func parseInput(input string) (float64, string, error) {
 	input = strings.ToLower(strings.TrimSpace(input))
 
-	// Ordered by decreasing length to avoid prefix collisions during unit matching (e.g. "mb" matching "m")
-	allUnits := []string{"week", "day", "min", "tb", "gb", "mb", "kb", "in", "cm", "ft", "km", "mi", "ms", "oz", "lb", "kg", "b", "m", "g", "h", "s", "c", "f", "k"}
-
 	for _, unit := range allUnits {
 		before, ok := strings.CutSuffix(input, unit)
 		if !ok || before == "" {
@@ -141,8 +141,11 @@ func parseInput(input string) (float64, string, error) {
 }
 
 var convertCmd = &cobra.Command{
-	Use:     "convert [value][unit]",
-	Short:   "Convert units: length (in, cm, ft, m, km, mi), weight (g, oz, lb, kg), temperature (c, f, k), storage (b, kb, mb, gb, tb), time (ms, s, min, h, day, week)",
+	Use:   "convert [value][unit]",
+	Short: "Convert units: length, weight, temperature, storage, time",
+	Long: fmt.Sprintf("Supported units: %s.",
+		strings.Join(allUnits, ", "),
+	),
 	GroupID: "misc",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
