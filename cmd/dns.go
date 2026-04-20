@@ -12,7 +12,7 @@ var dnsCmd = &cobra.Command{
 	Use:     "dns [domain] [type]",
 	Short:   "Resolve DNS records for a domain",
 	GroupID: "network",
-	Args:    cobra.MinimumNArgs(1),
+	Args:    cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		domain := args[0]
 		recordType := ""
