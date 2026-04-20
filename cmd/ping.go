@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
 	"orbx/internal/netutil"
 	"time"
 
@@ -17,31 +16,20 @@ var pingCmd = &cobra.Command{
 	GroupID: "network",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		url := netutil.NormalizeURL(args[0])
-
-		client := &http.Client{
-			Timeout: 3 * time.Second,
-		}
-
 		var total time.Duration
 		var min time.Duration = time.Hour
 		var max time.Duration
 
-		fmt.Printf("PING %s\n\n", url)
-
 		for i := 1; i <= pingCount; i++ {
-
 			start := time.Now()
 
-			resp, err := client.Get(url)
+			_, err := netutil.Get(args[0], netutil.WithTimeout(3*time.Second))
 			latency := time.Since(start)
 
 			if err != nil {
 				fmt.Printf("%d: ERROR (%s)\n", i, err)
 				continue
 			}
-
-			resp.Body.Close()
 
 			fmt.Printf("%d: %s\n", i, latency)
 

@@ -22,13 +22,13 @@ var tcpcheckCmd = &cobra.Command{
 		latency := time.Since(start)
 
 		if err != nil {
-			fmt.Printf("FAIL %s (%s)\n", target, latency)
+			fmt.Printf("🔴 %s (%s)\n", target, latency)
 			return
 		}
 
 		defer conn.Close()
 
-		fmt.Printf("OK   %s (%s)\n", target, latency)
+		fmt.Printf("🟢 %s (%s)\n", target, latency)
 	},
 }
 

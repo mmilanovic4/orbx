@@ -3,7 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
+	"orbx/internal/netutil"
 	"os/exec"
 
 	"github.com/spf13/cobra"
@@ -16,20 +16,21 @@ type XKCD struct {
 	Num   int    `json:"num"`
 }
 
+var open bool
+
 var xkcdCmd = &cobra.Command{
 	Use:     "xkcd",
 	Short:   "Fetch latest XKCD comic",
 	GroupID: "misc",
 	Run: func(cmd *cobra.Command, args []string) {
-		resp, err := http.Get("https://xkcd.com/info.0.json")
+		resp, err := netutil.Get("https://xkcd.com/info.0.json")
 		if err != nil {
 			fmt.Println("Error:", err)
 			return
 		}
-		defer resp.Body.Close()
 
 		var comic XKCD
-		if err := json.NewDecoder(resp.Body).Decode(&comic); err != nil {
+		if err := json.Unmarshal(resp.Body, &comic); err != nil {
 			fmt.Println("Decode error:", err)
 			return
 		}
@@ -39,10 +40,13 @@ var xkcdCmd = &cobra.Command{
 		fmt.Println("\nAlt text:")
 		fmt.Println(comic.Alt)
 
-		exec.Command("open", comic.Img).Start()
+		if open {
+			exec.Command("open", comic.Img).Start()
+		}
 	},
 }
 
 func init() {
+	xkcdCmd.Flags().BoolVar(&open, "open", false, "open in browser")
 	rootCmd.AddCommand(xkcdCmd)
 }

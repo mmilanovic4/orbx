@@ -2,9 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"io"
 	"net"
-	"net/http"
+	"orbx/internal/netutil"
 
 	"github.com/spf13/cobra"
 )
@@ -15,17 +14,15 @@ var ipCmd = &cobra.Command{
 	GroupID: "network",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Public IP
-		resp, err := http.Get("https://api.ipify.org")
+		resp, err := netutil.Get("https://api.ipify.org")
 		if err != nil {
 			fmt.Println("Failed to get public IP:", err)
 		} else {
-			defer resp.Body.Close()
-			body, _ := io.ReadAll(resp.Body)
-			fmt.Println("Public IP:", string(body))
+			fmt.Println("Public IP:", string(resp.Body))
 		}
 
 		// Local IPs
-		fmt.Println("\nLocal IPs:")
+		fmt.Println("Local IPs:")
 		interfaces, err := net.Interfaces()
 		if err != nil {
 			fmt.Println("Failed to get network interfaces:", err)
@@ -48,17 +45,18 @@ var ipCmd = &cobra.Command{
 					ip = v.IP
 				}
 
-				// filter IPv4 + skip loopback
-				if ip == nil || ip.IsLoopback() {
-					continue
+				// skip loopback
+				if ip.IsLoopback() {
+					// continue
 				}
 
-				ip = ip.To4()
-				if ip == nil {
-					continue
+				// MAC address
+				mac := i.HardwareAddr.String()
+				if mac == "" {
+					mac = "No MAC"
 				}
 
-				fmt.Printf(" - %s (%s)\n", ip.String(), i.Name)
+				fmt.Printf(" - %-8s %-39s [%s]\n", "("+i.Name+")", ip.String(), mac)
 			}
 		}
 	},

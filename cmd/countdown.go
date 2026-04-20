@@ -24,7 +24,7 @@ var countdownCmd = &cobra.Command{
 			remaining := time.Until(end)
 			if remaining <= 0 {
 				fmt.Print("\rDone.   \n")
-				fmt.Print("\a") // 🔊 beep
+				fmt.Print("\a") // beep
 				return
 			}
 
