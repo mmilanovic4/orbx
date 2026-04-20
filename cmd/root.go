@@ -53,9 +53,9 @@ func init() {
 		Title: "💻 Developer Tools",
 	})
 
-	// 📦 Content Tools
+	// 📦 Misc Tools
 	rootCmd.AddGroup(&cobra.Group{
-		ID:    "content",
-		Title: "📦 Content Tools",
+		ID:    "misc",
+		Title: "📦 Misc Tools",
 	})
 }

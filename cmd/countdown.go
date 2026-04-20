@@ -10,7 +10,7 @@ import (
 var countdownCmd = &cobra.Command{
 	Use:     "countdown [duration]",
 	Short:   "Countdown timer (e.g. 1h30m, 5m, 90s)",
-	GroupID: "system",
+	GroupID: "misc",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		duration, err := time.ParseDuration(args[0])
@@ -24,6 +24,7 @@ var countdownCmd = &cobra.Command{
 			remaining := time.Until(end)
 			if remaining <= 0 {
 				fmt.Print("\rDone.   \n")
+				fmt.Print("\a") // 🔊 beep
 				return
 			}
 
