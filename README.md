@@ -2,7 +2,7 @@
 
 orbx is a lightweight CLI utility for quick system tasks.
 
-Some of the available commands include clipboard utilities, a lightweight static web server for serving local directories, and system/network information tools.
+Some of the available commands include clipboard utilities, a lightweight static web server for serving local directories and system/network information tools.
 
 ---
 
