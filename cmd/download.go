@@ -14,7 +14,7 @@ var downloadCmd = &cobra.Command{
 	Use:     "download [url]",
 	Short:   "Download a file from a URL",
 	GroupID: "util",
-	Args:    cobra.RangeArgs(1, 2),
+	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		resp, err := netutil.Get(args[0])
 		if err != nil {
