@@ -46,6 +46,7 @@ Usage:
   serve       Start a static file server in current directory
   text        String utilities
   unixts      Unix timestamp utilities
+  url         Decode and parse a URL
   uuid        Generate a UUID v4
 
 📦 Content
@@ -54,7 +55,6 @@ Usage:
 Additional Commands:
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
-  url         Decode and parse a URL
 
 Flags:
   -h, --help      help for orbx

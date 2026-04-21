@@ -42,8 +42,9 @@ func parseTypedValue(v string) any {
 }
 
 var urlCmd = &cobra.Command{
-	Use:   "url [url]",
-	Short: "Decode and parse a URL",
+	Use:     "url [url]",
+	Short:   "Decode and parse a URL",
+	GroupID: "dev",
 	Run: func(cmd *cobra.Command, args []string) {
 		raw := args[0]
 
