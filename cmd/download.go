@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"orbx/internal/netutil"
-	"os"
+	"orbx/internal/sysutil"
 
 	"github.com/spf13/cobra"
 )
@@ -25,7 +25,7 @@ var downloadCmd = &cobra.Command{
 		fmt.Println(string(resp.Body))
 
 		if downloadFile != "" {
-			err := os.WriteFile(downloadFile, resp.Body, 0644)
+			err := sysutil.WriteFile(downloadFile, resp.Body)
 			if err != nil {
 				fmt.Println("Failed to save file:", err)
 				return
@@ -33,7 +33,6 @@ var downloadCmd = &cobra.Command{
 
 			fmt.Printf("Saved to %s\n", downloadFile)
 			return
-
 		}
 	},
 }
