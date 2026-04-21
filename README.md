@@ -41,6 +41,7 @@ Usage:
   base64      Encode or decode base64
   hash        Generate hash of a string
   hex         Encode or decode hex
+  html        Encode or decode HTML entities
   jwt         Decode a JWT token (header and payload, no verification)
   ports       Show processes using network ports
   serve       Start a static file server in current directory
