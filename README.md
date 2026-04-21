@@ -64,6 +64,12 @@ Flags:
 Use "orbx [command] --help" for more information about a command.
 ```
 
+Stdin support is available across most tools, allowing you to pipe input directly instead of passing it as an argument:
+
+```
+echo -n "lorem ipsum" | orbx hash md5
+```
+
 ## 🔧 Requirements
 
 - Go 1.20+
