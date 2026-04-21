@@ -11,7 +11,7 @@ import (
 var clearclipCmd = &cobra.Command{
 	Use:     "clearclip",
 	Short:   "Clear system clipboard",
-	GroupID: "system",
+	GroupID: "util",
 	Run: func(cmd *cobra.Command, args []string) {
 		switch runtime.GOOS {
 		case "darwin":
@@ -24,7 +24,8 @@ var clearclipCmd = &cobra.Command{
 			}
 		case "linux":
 			// Linux (X11)
-			cmd := exec.Command("bash", "-c", "echo -n | xclip -selection clipboard")
+			cmd := exec.Command("xclip", "-selection", "clipboard")
+			cmd.Stdin = nil
 			if err := cmd.Run(); err != nil {
 				fmt.Println("error clearing clipboard (xclip missing?):", err)
 				return

@@ -35,10 +35,10 @@ func init() {
 	// Version flag
 	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "show version")
 
-	// 🧠 System Tools
+	// 🧰 Utilities
 	rootCmd.AddGroup(&cobra.Group{
-		ID:    "system",
-		Title: "🧠 System Tools",
+		ID:    "util",
+		Title: "🧰 Utilities",
 	})
 
 	// 🌐 Network Tools
@@ -53,9 +53,9 @@ func init() {
 		Title: "💻 Developer Tools",
 	})
 
-	// 📦 Misc Tools
+	// 📦 Content
 	rootCmd.AddGroup(&cobra.Group{
 		ID:    "misc",
-		Title: "📦 Misc Tools",
+		Title: "📦 Content",
 	})
 }

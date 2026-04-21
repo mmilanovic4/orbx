@@ -10,7 +10,7 @@ import (
 var countdownCmd = &cobra.Command{
 	Use:     "countdown [duration]",
 	Short:   "Countdown timer (e.g. 1h30m, 5m, 90s)",
-	GroupID: "misc",
+	GroupID: "util",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		duration, err := time.ParseDuration(args[0])

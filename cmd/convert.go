@@ -146,7 +146,7 @@ var convertCmd = &cobra.Command{
 	Long: fmt.Sprintf("Supported units: %s.",
 		strings.Join(allUnits, ", "),
 	),
-	GroupID: "misc",
+	GroupID: "util",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		val, from, err := parseInput(args[0])
