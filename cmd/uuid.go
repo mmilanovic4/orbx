@@ -8,8 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var uuidCompact bool
-var uuidUpper bool
+var (
+	uuidCompact bool
+	uuidUpper   bool
+)
 
 var uuidCmd = &cobra.Command{
 	Use:     "uuid",

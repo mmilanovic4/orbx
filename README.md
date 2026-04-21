@@ -24,6 +24,7 @@ Usage:
   orbx [command]
 
 🧰 Utilities
+  aes         AES-GCM encryption utilities
   clearclip   Clear system clipboard
   convert     Convert units: length, weight, temperature, storage, time
   countdown   Countdown timer (e.g. 1h30m, 5m, 90s)
