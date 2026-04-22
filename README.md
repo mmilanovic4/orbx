@@ -74,6 +74,14 @@ Stdin support is available across most tools, allowing you to pipe input directl
 echo -n "lorem ipsum" | orbx hash md5
 ```
 
+## Clear clipboard
+
+```bash
+orbx clearclip
+```
+
+> **Note:** `clearclip` is supported on macOS and Linux (X11) only. On Linux, `xclip` must be installed (`apt install xclip`). Windows is not currently supported.
+
 ## AES-GCM Encryption
 
 ```bash
