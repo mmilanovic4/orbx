@@ -72,6 +72,23 @@ Stdin support is available across most tools, allowing you to pipe input directl
 echo -n "lorem ipsum" | orbx hash md5
 ```
 
+## AES-GCM Encryption
+
+```bash
+# AES-256 (default)
+orbx aes key --out secret.key
+
+# AES-128 or AES-192
+orbx aes key 16 --out secret.key
+orbx aes key 24 --out secret.key
+
+# Encrypt and save to file
+orbx aes encrypt 'Hello from the other side!' --key secret.key --out ciphertext.txt
+
+# Decrypt from file
+orbx aes decrypt --key secret.key --file ciphertext.txt
+```
+
 ## 🔧 Requirements
 
 - Go 1.20+

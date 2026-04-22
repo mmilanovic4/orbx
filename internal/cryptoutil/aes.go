@@ -7,17 +7,43 @@ import (
 	"fmt"
 	"orbx/internal/encodingutil"
 	"orbx/internal/sysutil"
+	"strings"
 )
 
-func Encrypt(plaintext, key []byte) ([]byte, error) {
+const (
+	KeySize128 = 16
+	KeySize192 = 24
+	KeySize256 = 32
+)
+
+func validateKeySize(key []byte) error {
+	switch len(key) {
+	case KeySize128, KeySize192, KeySize256:
+		return nil
+	default:
+		return fmt.Errorf("invalid key size %d: must be 16, 24, or 32 bytes", len(key))
+	}
+}
+
+func newGCM(key []byte) (cipher.AEAD, error) {
+	if err := validateKeySize(key); err != nil {
+		return nil, err
+	}
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create cipher: %w", err)
 	}
-
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create GCM: %w", err)
+	}
+	return gcm, nil
+}
+
+func Encrypt(plaintext, key []byte) ([]byte, error) {
+	gcm, err := newGCM(key)
+	if err != nil {
+		return nil, err
 	}
 
 	nonce := make([]byte, gcm.NonceSize())
@@ -25,30 +51,21 @@ func Encrypt(plaintext, key []byte) ([]byte, error) {
 		return nil, fmt.Errorf("failed to generate nonce: %w", err)
 	}
 
-	ciphertext := gcm.Seal(nil, nonce, plaintext, nil)
-
-	return append(nonce, ciphertext...), nil
+	return gcm.Seal(nonce, nonce, plaintext, nil), nil
 }
 
 func Decrypt(data, key []byte) ([]byte, error) {
-	block, err := aes.NewCipher(key)
+	gcm, err := newGCM(key)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create cipher: %w", err)
-	}
-
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create GCM: %w", err)
+		return nil, err
 	}
 
 	nonceSize := gcm.NonceSize()
-	if len(data) < nonceSize {
+	if len(data) < nonceSize+gcm.Overhead() {
 		return nil, fmt.Errorf("invalid ciphertext: data too short")
 	}
 
-	nonce := data[:nonceSize]
-	ciphertext := data[nonceSize:]
-
+	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
 	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
 		return nil, fmt.Errorf("decryption failed: %w", err)
@@ -67,9 +84,15 @@ func ReadKey(keyFile string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to read key file: %w", err)
 	}
 
-	keyDecoded, err := encodingutil.DecodeBase64(string(keyEncoded))
+	trimmed := strings.TrimSpace(string(keyEncoded))
+
+	keyDecoded, err := encodingutil.DecodeBase64(trimmed)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode key: %w", err)
+	}
+
+	if err := validateKeySize(keyDecoded); err != nil {
+		return nil, fmt.Errorf("invalid key in file: %w", err)
 	}
 
 	return keyDecoded, nil
