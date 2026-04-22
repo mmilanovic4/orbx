@@ -89,6 +89,37 @@ orbx aes encrypt 'Hello from the other side!' --key secret.key --out ciphertext.
 orbx aes decrypt --key secret.key --file ciphertext.txt
 ```
 
+## Entropy
+
+Calculates the Shannon entropy of an input, expressed in bits per byte.
+
+> **Note:** By default, `entropy` attempts to decode the input as base64 before calculating — consistent with the output format of the `aes encrypt` command. If your input is not base64-encoded, pass the `--raw` flag to skip decoding and calculate entropy on the raw input directly.
+
+```bash
+# Direct input (base64)
+orbx entropy 'SGVsbG8='
+
+# Skip base64 decoding, treat input as raw bytes
+orbx entropy 'Hello!' --raw
+
+# From file
+orbx entropy --file ciphertext.txt
+
+# Good entropy
+head -c 10000 /dev/urandom | orbx base64 encode | orbx entropy
+```
+
+**Interpreting the result:**
+
+| bits/byte | Meaning                                            |
+| --------- | -------------------------------------------------- |
+| ~8.0      | Excellent — output looks random (good ciphertext)  |
+| 6.0–7.9   | High entropy — likely compressed or encrypted data |
+| 3.0–5.9   | Moderate — structured data, natural language       |
+| < 3.0     | Low — highly repetitive or predictable input       |
+
+A well-formed AES-GCM ciphertext should score close to **8.0 bits/byte**.
+
 ## 🔧 Requirements
 
 - Go 1.20+
