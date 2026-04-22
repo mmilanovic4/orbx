@@ -30,6 +30,7 @@ Usage:
   countdown   Countdown timer (e.g. 1h30m, 5m, 90s)
   download    Download a file from a URL
   entropy     Calculate Shannon entropy of input
+  random      Generate a cryptographically secure random string
   watch       Repeatedly run a command every N seconds
 
 🌐 Network Tools

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"orbx/internal/cryptoutil"
 	"orbx/internal/encodingutil"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -28,7 +27,7 @@ var entropyCmd = &cobra.Command{
 
 		data, err := encodingutil.GetInputData(input, entropyFile)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			fmt.Println(err)
 			return
 		}
 

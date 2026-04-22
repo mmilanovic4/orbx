@@ -6,7 +6,6 @@ import (
 	"orbx/internal/cryptoutil"
 	"orbx/internal/encodingutil"
 	"orbx/internal/sysutil"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -34,20 +33,20 @@ var aesEncryptCmd = &cobra.Command{
 
 		key, err := cryptoutil.ReadKey(keyFile)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "failed to read key:", err)
-			os.Exit(1)
+			fmt.Println("failed to read key:", err)
+			return
 		}
 
 		plainText, err := encodingutil.GetInputData(rawInput, inputFile)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "failed to read input:", err)
-			os.Exit(1)
+			fmt.Println("failed to read input:", err)
+			return
 		}
 
 		cipherText, err := cryptoutil.Encrypt(plainText, key)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "encryption failed:", err)
-			os.Exit(1)
+			fmt.Println("encryption failed:", err)
+			return
 		}
 
 		cipherTextEncoded := encodingutil.EncodeBase64(cipherText)
@@ -55,8 +54,8 @@ var aesEncryptCmd = &cobra.Command{
 
 		if outFile != "" {
 			if err := sysutil.WriteFile(outFile, []byte(cipherTextEncoded)); err != nil {
-				fmt.Fprintln(os.Stderr, "failed to write output file:", err)
-				os.Exit(1)
+				fmt.Println("failed to write output file:", err)
+				return
 			}
 		}
 	},
@@ -78,34 +77,34 @@ var aesDecryptCmd = &cobra.Command{
 
 		key, err := cryptoutil.ReadKey(keyFile)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "failed to read key:", err)
-			os.Exit(1)
+			fmt.Println("failed to read key:", err)
+			return
 		}
 
 		rawBytes, err := encodingutil.GetInputData(rawInput, inputFile)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "failed to read input:", err)
-			os.Exit(1)
+			fmt.Println("failed to read input:", err)
+			return
 		}
 
 		cipherText, err := encodingutil.DecodeBase64(strings.TrimSpace(string(rawBytes)))
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "failed to decode base64 input:", err)
-			os.Exit(1)
+			fmt.Println("failed to decode base64 input:", err)
+			return
 		}
 
 		plainText, err := cryptoutil.Decrypt(cipherText, key)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "decryption failed:", err)
-			os.Exit(1)
+			fmt.Println("decryption failed:", err)
+			return
 		}
 
 		fmt.Println(string(plainText))
 
 		if outFile != "" {
 			if err := sysutil.WriteFile(outFile, plainText); err != nil {
-				fmt.Fprintln(os.Stderr, "failed to write output file:", err)
-				os.Exit(1)
+				fmt.Println("failed to write output file:", err)
+				return
 			}
 		}
 	},
@@ -134,8 +133,8 @@ var aesKeyCmd = &cobra.Command{
 
 		key := make([]byte, size)
 		if _, err := rand.Read(key); err != nil {
-			fmt.Fprintln(os.Stderr, "failed to generate key:", err)
-			os.Exit(1)
+			fmt.Println("failed to generate key:", err)
+			return
 		}
 
 		keyEncoded := encodingutil.EncodeBase64(key)
@@ -143,8 +142,8 @@ var aesKeyCmd = &cobra.Command{
 
 		if outFile != "" {
 			if err := sysutil.WriteFile(outFile, []byte(keyEncoded)); err != nil {
-				fmt.Fprintln(os.Stderr, "failed to write output file:", err)
-				os.Exit(1)
+				fmt.Println("failed to write output file:", err)
+				return
 			}
 		}
 	},
