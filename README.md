@@ -110,7 +110,7 @@ orbx entropy --file ciphertext.txt
 head -c 10000 /dev/urandom | orbx base64 encode | orbx entropy
 ```
 
-**Interpreting the result:**
+### Interpreting the result
 
 | bits/byte | Meaning                                            |
 | --------- | -------------------------------------------------- |
