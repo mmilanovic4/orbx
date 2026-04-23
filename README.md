@@ -25,13 +25,17 @@ Usage:
 
 🧰 Utilities
   aes         AES-GCM encryption utilities
+  base64      Encode or decode base64
   clearclip   Clear system clipboard
   compress    Compress or decompress input using gzip
   convert     Convert units: length, weight, temperature, storage, time
   countdown   Countdown timer (e.g. 1h30m, 5m, 90s)
   download    Download a file from a URL
   entropy     Calculate Shannon entropy of input
+  hash        Generate hash of a string
+  hex         Encode or decode hex
   random      Generate a cryptographically secure random string
+  text        String utilities
   watch       Repeatedly run a command every N seconds
 
 🌐 Network Tools
@@ -43,14 +47,11 @@ Usage:
   tcpcheck    Check TCP port connectivity
 
 💻 Developer Tools
-  base64      Encode or decode base64
-  hash        Generate hash of a string
-  hex         Encode or decode hex
   html        Encode or decode HTML entities
   jwt         Decode a JWT token (header and payload, no verification)
   ports       Show processes using network ports
+  prettyprint Format and pretty print JSON or XML
   serve       Start a static file server in current directory
-  text        String utilities
   unixts      Unix timestamp utilities
   url         Decode and parse a URL
   uuid        Generate a UUID v4

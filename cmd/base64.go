@@ -12,7 +12,7 @@ var base64File string
 var base64Cmd = &cobra.Command{
 	Use:     "base64 [encode|decode] [text]",
 	Short:   "Encode or decode base64",
-	GroupID: "dev",
+	GroupID: "util",
 	Args:    cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		mode := args[0]

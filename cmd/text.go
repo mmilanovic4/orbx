@@ -13,7 +13,7 @@ var substring string
 var textCmd = &cobra.Command{
 	Use:     "text [operation] [input]",
 	Short:   "String utilities",
-	GroupID: "dev",
+	GroupID: "util",
 	Args:    cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		op := args[0]

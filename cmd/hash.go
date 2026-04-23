@@ -12,7 +12,7 @@ var hashFile string
 var hashCmd = &cobra.Command{
 	Use:     "hash [algorithm] [text]",
 	Short:   "Generate hash of a string",
-	GroupID: "dev",
+	GroupID: "util",
 	Args:    cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		algo := args[0]

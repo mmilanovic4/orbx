@@ -12,7 +12,7 @@ var hexFile string
 var hexCmd = &cobra.Command{
 	Use:     "hex [encode|decode] [text]",
 	Short:   "Encode or decode hex",
-	GroupID: "dev",
+	GroupID: "util",
 	Args:    cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		mode := args[0]
