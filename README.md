@@ -130,6 +130,38 @@ head -c 10000 /dev/urandom | orbx base64 encode | orbx entropy
 
 A well-formed AES-GCM ciphertext should score close to **8.0 bits/byte**.
 
+## Compression
+
+By default, output is base64-encoded for compatibility with other `orbx` commands (e.g. piping into `aes encrypt`). Use `--raw` to write raw gzip bytes, which can be opened with 7-Zip, `gunzip`, or any standard gzip tool.
+
+> **Note:** `--raw` output is fully compatible with `gzip`/`gunzip` for single files. Archives created with `tar -czf` (`.tar.gz`) are not supported — use `tar` directly for directories.
+
+```bash
+# Compress a string and save to file (base64 output)
+orbx compress 'Hello from the other side!' --out compressed.txt
+
+# Compress a file and save output (base64 output)
+orbx compress --file largefile.txt --out compressed.txt
+
+# Decompress a base64-compressed file
+orbx compress --file compressed.txt --decode
+
+# Compress to a raw .gz file (compatible with 7-Zip, gunzip, etc.)
+orbx compress --file largefile.txt --raw --out archive.gz
+
+# Decompress a raw .gz file
+orbx compress --file archive.gz --raw --decode
+
+# Compress and decompress via pipeline
+cat largefile.txt | orbx compress | orbx compress --decode
+
+# Compress then encrypt
+cat largefile.txt | orbx compress | orbx aes encrypt --key secret.key --out out.enc
+
+# Decrypt then decompress
+orbx aes decrypt --file out.enc --key secret.key | orbx compress --decode
+```
+
 ## 🔧 Requirements
 
 - Go 1.20+

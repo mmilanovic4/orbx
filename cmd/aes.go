@@ -33,19 +33,19 @@ var aesEncryptCmd = &cobra.Command{
 
 		key, err := cryptoutil.ReadKey(keyFile)
 		if err != nil {
-			fmt.Println("failed to read key:", err)
+			fmt.Println(err)
 			return
 		}
 
 		plainText, err := encodingutil.GetInputData(rawInput, inputFile)
 		if err != nil {
-			fmt.Println("failed to read input:", err)
+			fmt.Println(err)
 			return
 		}
 
 		cipherText, err := cryptoutil.Encrypt(plainText, key)
 		if err != nil {
-			fmt.Println("encryption failed:", err)
+			fmt.Println(err)
 			return
 		}
 
@@ -54,7 +54,7 @@ var aesEncryptCmd = &cobra.Command{
 
 		if outFile != "" {
 			if err := sysutil.WriteFile(outFile, []byte(cipherTextEncoded)); err != nil {
-				fmt.Println("failed to write output file:", err)
+				fmt.Println(err)
 				return
 			}
 		}
@@ -77,25 +77,25 @@ var aesDecryptCmd = &cobra.Command{
 
 		key, err := cryptoutil.ReadKey(keyFile)
 		if err != nil {
-			fmt.Println("failed to read key:", err)
+			fmt.Println(err)
 			return
 		}
 
 		rawBytes, err := encodingutil.GetInputData(rawInput, inputFile)
 		if err != nil {
-			fmt.Println("failed to read input:", err)
+			fmt.Println(err)
 			return
 		}
 
 		cipherText, err := encodingutil.DecodeBase64(strings.TrimSpace(string(rawBytes)))
 		if err != nil {
-			fmt.Println("failed to decode base64 input:", err)
+			fmt.Println(err)
 			return
 		}
 
 		plainText, err := cryptoutil.Decrypt(cipherText, key)
 		if err != nil {
-			fmt.Println("decryption failed:", err)
+			fmt.Println(err)
 			return
 		}
 
@@ -103,7 +103,7 @@ var aesDecryptCmd = &cobra.Command{
 
 		if outFile != "" {
 			if err := sysutil.WriteFile(outFile, plainText); err != nil {
-				fmt.Println("failed to write output file:", err)
+				fmt.Println(err)
 				return
 			}
 		}
@@ -133,7 +133,7 @@ var aesKeyCmd = &cobra.Command{
 
 		key := make([]byte, size)
 		if _, err := rand.Read(key); err != nil {
-			fmt.Println("failed to generate key:", err)
+			fmt.Println(err)
 			return
 		}
 
@@ -142,7 +142,7 @@ var aesKeyCmd = &cobra.Command{
 
 		if outFile != "" {
 			if err := sysutil.WriteFile(outFile, []byte(keyEncoded)); err != nil {
-				fmt.Println("failed to write output file:", err)
+				fmt.Println(err)
 				return
 			}
 		}

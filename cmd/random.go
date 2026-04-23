@@ -30,7 +30,6 @@ var randomCmd = &cobra.Command{
 		length, err := strconv.Atoi(args[0])
 		if err != nil {
 			fmt.Println(err)
-			fmt.Println("length is not valid")
 			return
 		}
 
@@ -57,7 +56,7 @@ var randomCmd = &cobra.Command{
 		for i := range result {
 			n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
 			if err != nil {
-				fmt.Println("failed to generate random string:", err)
+				fmt.Println(err)
 				return
 			}
 			result[i] = charset[n.Int64()]
