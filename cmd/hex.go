@@ -14,7 +14,7 @@ var hexCmd = &cobra.Command{
 	Short:   "Encode or decode hex",
 	GroupID: "util",
 	Args:    cobra.RangeArgs(1, 2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		mode := args[0]
 		var input string
 
@@ -24,8 +24,7 @@ var hexCmd = &cobra.Command{
 
 		data, err := encodingutil.GetInputData(input, hexFile)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("failed to read input: %w", err)
 		}
 
 		switch mode {
@@ -34,13 +33,14 @@ var hexCmd = &cobra.Command{
 		case "decode":
 			decoded, err := encodingutil.DecodeHex(string(data))
 			if err != nil {
-				fmt.Println("Invalid base64 input")
-				return
+				return fmt.Errorf("invalid hex input: %w", err)
 			}
 			fmt.Println(string(decoded))
 		default:
-			fmt.Println("Use encode or decode")
+			return fmt.Errorf("unknown mode %q: use encode or decode", mode)
 		}
+
+		return nil
 	},
 }
 

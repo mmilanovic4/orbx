@@ -14,7 +14,7 @@ var hashCmd = &cobra.Command{
 	Short:   "Generate hash of a string",
 	GroupID: "util",
 	Args:    cobra.RangeArgs(1, 2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		algo := args[0]
 		var input string
 
@@ -22,23 +22,22 @@ var hashCmd = &cobra.Command{
 			input = args[1]
 		}
 
-		data, err := encodingutil.GetInputData(input, base64File)
+		data, err := encodingutil.GetInputData(input, hashFile)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("failed to read input: %w", err)
 		}
 
 		hash, err := encodingutil.Hash(algo, data)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("failed to generate hash: %w", err)
 		}
 
 		fmt.Println(encodingutil.EncodeHex(hash))
+		return nil
 	},
 }
 
 func init() {
-	hashCmd.Flags().StringVarP(&base64File, "file", "f", "", "read input from file")
+	hashCmd.Flags().StringVarP(&hashFile, "file", "f", "", "read input from file")
 	rootCmd.AddCommand(hashCmd)
 }

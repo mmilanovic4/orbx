@@ -15,25 +15,22 @@ var downloadCmd = &cobra.Command{
 	Short:   "Download a file from a URL",
 	GroupID: "util",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		resp, err := netutil.Get(args[0])
 		if err != nil {
-			fmt.Println("Download failed:", err)
-			return
+			return fmt.Errorf("download failed: %w", err)
+		}
+
+		if downloadFile != "" {
+			if err := sysutil.WriteFile(downloadFile, resp.Body); err != nil {
+				return fmt.Errorf("failed to save file: %w", err)
+			}
+			fmt.Printf("Saved to %s\n", downloadFile)
+			return nil
 		}
 
 		fmt.Println(string(resp.Body))
-
-		if downloadFile != "" {
-			err := sysutil.WriteFile(downloadFile, resp.Body)
-			if err != nil {
-				fmt.Println("Failed to save file:", err)
-				return
-			}
-
-			fmt.Printf("Saved to %s\n", downloadFile)
-			return
-		}
+		return nil
 	},
 }
 

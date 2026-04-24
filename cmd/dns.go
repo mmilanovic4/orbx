@@ -13,7 +13,7 @@ var dnsCmd = &cobra.Command{
 	Short:   "Resolve DNS records for a domain",
 	GroupID: "network",
 	Args:    cobra.RangeArgs(1, 2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		domain := args[0]
 		recordType := ""
 
@@ -25,48 +25,42 @@ var dnsCmd = &cobra.Command{
 
 		switch recordType {
 		case "MX":
-			// MX records
-			mxRecords, err := net.LookupMX(domain)
+			records, err := net.LookupMX(domain)
 			if err != nil {
-				fmt.Println("Error:", err)
-				return
+				return fmt.Errorf("failed to lookup MX records: %w", err)
 			}
 			fmt.Println("\nMX records:")
-			for _, mx := range mxRecords {
+			for _, mx := range records {
 				fmt.Printf("  %s (priority %d)\n", mx.Host, mx.Pref)
 			}
 		case "CNAME":
-			// CNAME record
-			cnameRecord, err := net.LookupCNAME(domain)
+			record, err := net.LookupCNAME(domain)
 			if err != nil {
-				fmt.Println("Error:", err)
-				return
+				return fmt.Errorf("failed to lookup CNAME record: %w", err)
 			}
 			fmt.Println("\nCNAME record:")
-			fmt.Println(" ", cnameRecord)
+			fmt.Println(" ", record)
 		case "TXT":
-			// TXT records
-			txtRecords, err := net.LookupTXT(domain)
-			if err == nil {
-				fmt.Println("Error:", err)
-				return
+			records, err := net.LookupTXT(domain)
+			if err != nil {
+				return fmt.Errorf("failed to lookup TXT records: %w", err)
 			}
 			fmt.Println("\nTXT records:")
-			for _, t := range txtRecords {
+			for _, t := range records {
 				fmt.Println(" ", t)
 			}
 		default:
-			// A / AAAA records
 			ips, err := net.LookupIP(domain)
 			if err != nil {
-				fmt.Println("Error:", err)
-				return
+				return fmt.Errorf("failed to lookup A/AAAA records: %w", err)
 			}
 			fmt.Println("\nA / AAAA records:")
 			for _, ip := range ips {
 				fmt.Println(" ", ip)
 			}
 		}
+
+		return nil
 	},
 }
 

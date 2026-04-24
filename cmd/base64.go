@@ -14,7 +14,7 @@ var base64Cmd = &cobra.Command{
 	Short:   "Encode or decode base64",
 	GroupID: "util",
 	Args:    cobra.RangeArgs(1, 2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		mode := args[0]
 		var input string
 
@@ -24,8 +24,7 @@ var base64Cmd = &cobra.Command{
 
 		data, err := encodingutil.GetInputData(input, base64File)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("failed to read input: %w", err)
 		}
 
 		switch mode {
@@ -34,13 +33,14 @@ var base64Cmd = &cobra.Command{
 		case "decode":
 			decoded, err := encodingutil.DecodeBase64(string(data))
 			if err != nil {
-				fmt.Println("Invalid base64 input")
-				return
+				return fmt.Errorf("invalid base64 input: %w", err)
 			}
 			fmt.Println(string(decoded))
 		default:
-			fmt.Println("Use encode or decode")
+			return fmt.Errorf("unknown mode %q: use encode or decode", mode)
 		}
+
+		return nil
 	},
 }
 

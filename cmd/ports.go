@@ -15,24 +15,21 @@ var portsCmd = &cobra.Command{
 	Short:   "Show processes using network ports",
 	GroupID: "dev",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		port, err := netutil.ParsePort(args[0])
 		if err != nil {
-			fmt.Println(err)
-			return
+			return err
 		}
 
 		out, err := exec.Command("lsof", "-iTCP", "-sTCP:LISTEN", "-n", "-P").Output()
 		if err != nil {
-			fmt.Println("error:", err)
-			return
+			return fmt.Errorf("failed to run lsof: %w", err)
 		}
 
 		lines := strings.Split(string(out), "\n")
+		keyword := ":" + strconv.Itoa(port)
 
 		var found []string
-		var keyword string = ":" + strconv.Itoa(port)
-
 		for _, line := range lines {
 			if strings.Contains(line, keyword+" ") || strings.Contains(line, keyword+"\n") {
 				found = append(found, line)
@@ -41,14 +38,15 @@ var portsCmd = &cobra.Command{
 
 		if len(found) == 0 {
 			fmt.Printf("🟢 Port %d is open.\n", port)
-			return
+			return nil
 		}
 
 		fmt.Printf("🔴 Port %d is in use:\n", port)
-
 		for _, line := range found {
 			fmt.Println(line)
 		}
+
+		return nil
 	},
 }
 

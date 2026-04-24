@@ -13,28 +13,27 @@ var headersCmd = &cobra.Command{
 	Short:   "Show HTTP response status and headers",
 	GroupID: "network",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		start := time.Now()
 
 		resp, err := netutil.Get(args[0])
 		if err != nil {
-			fmt.Println("Request failed:", err)
-			return
+			return fmt.Errorf("request failed: %w", err)
 		}
 
 		duration := time.Since(start)
 
-		// Status
 		fmt.Printf("Status: %s\n", resp.Status)
 		fmt.Printf("Time: %s\n", duration)
 
-		// Headers
 		fmt.Println("Headers:")
 		for key, values := range resp.Headers {
 			for _, value := range values {
 				fmt.Printf("  %s: %s\n", key, value)
 			}
 		}
+
+		return nil
 	},
 }
 

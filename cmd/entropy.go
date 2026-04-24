@@ -19,7 +19,7 @@ var entropyCmd = &cobra.Command{
 	Short:   "Calculate Shannon entropy of input",
 	GroupID: "util",
 	Args:    cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var input string
 		if len(args) > 0 {
 			input = args[0]
@@ -27,8 +27,7 @@ var entropyCmd = &cobra.Command{
 
 		data, err := encodingutil.GetInputData(input, entropyFile)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("failed to read input: %w", err)
 		}
 
 		if !entropyRaw {
@@ -40,6 +39,7 @@ var entropyCmd = &cobra.Command{
 
 		entropy := cryptoutil.ShannonEntropy(data)
 		fmt.Printf("%.6f bits/byte\n", entropy)
+		return nil
 	},
 }
 

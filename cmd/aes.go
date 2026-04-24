@@ -21,7 +21,7 @@ var aesEncryptCmd = &cobra.Command{
 	Use:   "encrypt [input]",
 	Short: "Encrypt input using AES-GCM",
 	Args:  cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var rawInput string
 		if len(args) > 0 {
 			rawInput = args[0]
@@ -33,20 +33,17 @@ var aesEncryptCmd = &cobra.Command{
 
 		key, err := cryptoutil.ReadKey(keyFile)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("failed to read key: %w", err)
 		}
 
 		plainText, err := encodingutil.GetInputData(rawInput, inputFile)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("failed to read input: %w", err)
 		}
 
 		cipherText, err := cryptoutil.Encrypt(plainText, key)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("encryption failed: %w", err)
 		}
 
 		cipherTextEncoded := encodingutil.EncodeBase64(cipherText)
@@ -54,10 +51,11 @@ var aesEncryptCmd = &cobra.Command{
 
 		if outFile != "" {
 			if err := sysutil.WriteFile(outFile, []byte(cipherTextEncoded)); err != nil {
-				fmt.Println(err)
-				return
+				return fmt.Errorf("failed to write output file: %w", err)
 			}
 		}
+
+		return nil
 	},
 }
 
@@ -65,7 +63,7 @@ var aesDecryptCmd = &cobra.Command{
 	Use:   "decrypt [input]",
 	Short: "Decrypt input using AES-GCM",
 	Args:  cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var rawInput string
 		if len(args) > 0 {
 			rawInput = args[0]
@@ -77,36 +75,33 @@ var aesDecryptCmd = &cobra.Command{
 
 		key, err := cryptoutil.ReadKey(keyFile)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("failed to read key: %w", err)
 		}
 
 		rawBytes, err := encodingutil.GetInputData(rawInput, inputFile)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("failed to read input: %w", err)
 		}
 
 		cipherText, err := encodingutil.DecodeBase64(strings.TrimSpace(string(rawBytes)))
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("failed to decode base64 input: %w", err)
 		}
 
 		plainText, err := cryptoutil.Decrypt(cipherText, key)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("decryption failed: %w", err)
 		}
 
 		fmt.Println(string(plainText))
 
 		if outFile != "" {
 			if err := sysutil.WriteFile(outFile, plainText); err != nil {
-				fmt.Println(err)
-				return
+				return fmt.Errorf("failed to write output file: %w", err)
 			}
 		}
+
+		return nil
 	},
 }
 
@@ -114,7 +109,7 @@ var aesKeyCmd = &cobra.Command{
 	Use:   "key [size]",
 	Short: "Generate a new AES key (size: 16, 24, 32 — default 32)",
 	Args:  cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		outFile, _ := cmd.Flags().GetString("out")
 
 		size := 32
@@ -133,8 +128,7 @@ var aesKeyCmd = &cobra.Command{
 
 		key := make([]byte, size)
 		if _, err := rand.Read(key); err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("failed to generate key: %w", err)
 		}
 
 		keyEncoded := encodingutil.EncodeBase64(key)
@@ -142,10 +136,11 @@ var aesKeyCmd = &cobra.Command{
 
 		if outFile != "" {
 			if err := sysutil.WriteFile(outFile, []byte(keyEncoded)); err != nil {
-				fmt.Println(err)
-				return
+				return fmt.Errorf("failed to write output file: %w", err)
 			}
 		}
+
+		return nil
 	},
 }
 

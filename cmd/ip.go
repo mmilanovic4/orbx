@@ -12,8 +12,7 @@ var ipCmd = &cobra.Command{
 	Use:     "ip",
 	Short:   "Show public and local IP addresses",
 	GroupID: "network",
-	Run: func(cmd *cobra.Command, args []string) {
-		// Public IP
+	RunE: func(cmd *cobra.Command, args []string) error {
 		resp, err := netutil.Get("https://api.ipify.org")
 		if err != nil {
 			fmt.Println("Failed to get public IP:", err)
@@ -21,12 +20,10 @@ var ipCmd = &cobra.Command{
 			fmt.Println("Public IP:", string(resp.Body))
 		}
 
-		// Local IPs
 		fmt.Println("Local IPs:")
 		interfaces, err := net.Interfaces()
 		if err != nil {
-			fmt.Println("Failed to get network interfaces:", err)
-			return
+			return fmt.Errorf("failed to get network interfaces: %w", err)
 		}
 
 		for _, i := range interfaces {
@@ -45,12 +42,10 @@ var ipCmd = &cobra.Command{
 					ip = v.IP
 				}
 
-				// skip loopback
 				if ip.IsLoopback() {
 					// continue
 				}
 
-				// MAC address
 				mac := i.HardwareAddr.String()
 				if mac == "" {
 					mac = "No MAC"
@@ -59,6 +54,8 @@ var ipCmd = &cobra.Command{
 				fmt.Printf(" - %-8s %-39s [%s]\n", "("+i.Name+")", ip.String(), mac)
 			}
 		}
+
+		return nil
 	},
 }
 

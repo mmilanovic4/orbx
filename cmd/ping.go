@@ -15,7 +15,7 @@ var pingCmd = &cobra.Command{
 	Short:   "HTTP latency check (like ping, but for URLs)",
 	GroupID: "network",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var total time.Duration
 		var min time.Duration = time.Hour
 		var max time.Duration
@@ -48,6 +48,8 @@ var pingCmd = &cobra.Command{
 		fmt.Printf("\navg: %s\n", avg)
 		fmt.Printf("min: %s\n", min)
 		fmt.Printf("max: %s\n", max)
+
+		return nil
 	},
 }
 

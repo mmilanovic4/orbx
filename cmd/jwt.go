@@ -14,30 +14,29 @@ var jwtCmd = &cobra.Command{
 	Short:   "Decode a JWT token (header and payload, no verification)",
 	GroupID: "dev",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		token := args[0]
 		parts := strings.Split(token, ".")
 		if len(parts) != 3 {
-			fmt.Println("Invalid JWT: expected 3 parts separated by '.'")
-			return
+			return fmt.Errorf("invalid JWT: expected 3 parts separated by '.'")
 		}
 
 		header, err := decodeJWTPart(parts[0])
 		if err != nil {
-			fmt.Println("Failed to decode header:", err)
-			return
+			return fmt.Errorf("failed to decode header: %w", err)
 		}
 
 		payload, err := decodeJWTPart(parts[1])
 		if err != nil {
-			fmt.Println("Failed to decode payload:", err)
-			return
+			return fmt.Errorf("failed to decode payload: %w", err)
 		}
 
 		fmt.Println("=== Header ===")
 		fmt.Println(header)
 		fmt.Println("=== Payload ===")
 		fmt.Println(payload)
+
+		return nil
 	},
 }
 

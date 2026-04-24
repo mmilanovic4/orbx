@@ -148,11 +148,10 @@ var convertCmd = &cobra.Command{
 	),
 	GroupID: "util",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		val, from, err := parseInput(args[0])
 		if err != nil {
-			fmt.Println(err)
-			return
+			return err
 		}
 
 		if tempUnits[from] {
@@ -165,13 +164,12 @@ var convertCmd = &cobra.Command{
 				fmt.Printf(" = %.2f%s", result, unit)
 			}
 			fmt.Println()
-			return
+			return nil
 		}
 
 		group, ok := findGroup(from)
 		if !ok {
-			fmt.Printf("Unknown unit: %s\n", from)
-			return
+			return fmt.Errorf("unknown unit: %s", from)
 		}
 
 		fmt.Printf("%.4g%s", val, from)
@@ -183,6 +181,8 @@ var convertCmd = &cobra.Command{
 			fmt.Printf(" = %.4g%s", result, unit)
 		}
 		fmt.Println()
+
+		return nil
 	},
 }
 

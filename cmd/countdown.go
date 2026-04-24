@@ -12,11 +12,10 @@ var countdownCmd = &cobra.Command{
 	Short:   "Countdown timer (e.g. 1h30m, 5m, 90s)",
 	GroupID: "util",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		duration, err := time.ParseDuration(args[0])
 		if err != nil {
-			fmt.Println("Invalid duration. Examples: 1h30m, 5m, 90s")
-			return
+			return fmt.Errorf("invalid duration %q — examples: 1h30m, 5m, 90s", args[0])
 		}
 
 		end := time.Now().Add(duration)
@@ -24,8 +23,8 @@ var countdownCmd = &cobra.Command{
 			remaining := time.Until(end)
 			if remaining <= 0 {
 				fmt.Print("\rDone.   \n")
-				fmt.Print("\a") // beep
-				return
+				fmt.Print("\a")
+				return nil
 			}
 
 			h := int(remaining.Hours())

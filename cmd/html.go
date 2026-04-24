@@ -7,12 +7,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var htmlFile string
+
 var htmlCmd = &cobra.Command{
 	Use:     "html [encode|decode] [text]",
 	Short:   "Encode or decode HTML entities",
 	GroupID: "dev",
 	Args:    cobra.RangeArgs(1, 2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		action := args[0]
 
 		var input string
@@ -20,10 +22,9 @@ var htmlCmd = &cobra.Command{
 			input = args[1]
 		}
 
-		data, err := encodingutil.GetInputData(input, "")
+		data, err := encodingutil.GetInputData(input, htmlFile)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("failed to read input: %w", err)
 		}
 
 		text := string(data)
@@ -34,11 +35,14 @@ var htmlCmd = &cobra.Command{
 		case "decode":
 			fmt.Println(encodingutil.DecodeHTML(text))
 		default:
-			fmt.Println("Use encode or decode")
+			return fmt.Errorf("unknown mode %q: use encode or decode", action)
 		}
+
+		return nil
 	},
 }
 
 func init() {
+	htmlCmd.Flags().StringVarP(&htmlFile, "file", "f", "", "read input from file")
 	rootCmd.AddCommand(htmlCmd)
 }
