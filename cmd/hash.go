@@ -7,7 +7,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var hashFile string
+var (
+	hashFile string
+)
 
 var hashCmd = &cobra.Command{
 	Use:     "hash [algorithm] [text]",

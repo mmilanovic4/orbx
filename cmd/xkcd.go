@@ -16,7 +16,9 @@ type XKCD struct {
 	Num   int    `json:"num"`
 }
 
-var open bool
+var (
+	open bool
+)
 
 var xkcdCmd = &cobra.Command{
 	Use:     "xkcd",

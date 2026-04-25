@@ -12,8 +12,7 @@ func GetShell() string {
 }
 
 func ClearScreen() {
-	var c *exec.Cmd
-	c = exec.Command("clear")
+	c := exec.Command("clear")
 	c.Stdout = os.Stdout
 	c.Run()
 }

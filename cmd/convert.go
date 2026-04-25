@@ -14,59 +14,59 @@ type UnitGroup struct {
 	Order []string
 }
 
-var groups = map[string]UnitGroup{
-	"length": {
-		Base:  "m",
-		Order: []string{"in", "cm", "ft", "m", "km", "mi"},
-		Units: map[string]float64{
-			"in": 0.0254,
-			"cm": 0.01,
-			"ft": 0.3048,
-			"m":  1,
-			"km": 1000,
-			"mi": 1609.344,
+var (
+	groups = map[string]UnitGroup{
+		"length": {
+			Base:  "m",
+			Order: []string{"in", "cm", "ft", "m", "km", "mi"},
+			Units: map[string]float64{
+				"in": 0.0254,
+				"cm": 0.01,
+				"ft": 0.3048,
+				"m":  1,
+				"km": 1000,
+				"mi": 1609.344,
+			},
 		},
-	},
-	"weight": {
-		Base:  "kg",
-		Order: []string{"g", "oz", "lb", "kg"},
-		Units: map[string]float64{
-			"g":  0.001,
-			"oz": 0.0283495,
-			"lb": 0.453592,
-			"kg": 1,
+		"weight": {
+			Base:  "kg",
+			Order: []string{"g", "oz", "lb", "kg"},
+			Units: map[string]float64{
+				"g":  0.001,
+				"oz": 0.0283495,
+				"lb": 0.453592,
+				"kg": 1,
+			},
 		},
-	},
-	"storage": {
-		Base:  "b",
-		Order: []string{"b", "kb", "mb", "gb", "tb"},
-		Units: map[string]float64{
-			"b":  1,
-			"kb": 1024,
-			"mb": 1024 * 1024,
-			"gb": 1024 * 1024 * 1024,
-			"tb": 1024 * 1024 * 1024 * 1024,
+		"storage": {
+			Base:  "b",
+			Order: []string{"b", "kb", "mb", "gb", "tb"},
+			Units: map[string]float64{
+				"b":  1,
+				"kb": 1024,
+				"mb": 1024 * 1024,
+				"gb": 1024 * 1024 * 1024,
+				"tb": 1024 * 1024 * 1024 * 1024,
+			},
 		},
-	},
-	"time": {
-		Base:  "s",
-		Order: []string{"ms", "s", "min", "h", "day", "week"},
-		Units: map[string]float64{
-			"ms":   0.001,
-			"s":    1,
-			"min":  60,
-			"h":    3600,
-			"day":  86400,
-			"week": 604800,
+		"time": {
+			Base:  "s",
+			Order: []string{"ms", "s", "min", "h", "day", "week"},
+			Units: map[string]float64{
+				"ms":   0.001,
+				"s":    1,
+				"min":  60,
+				"h":    3600,
+				"day":  86400,
+				"week": 604800,
+			},
 		},
-	},
-}
-
-var tempUnits = map[string]bool{"c": true, "f": true, "k": true}
-var tempOrder = []string{"c", "f", "k"}
-
-// Ordered by decreasing length to avoid prefix collisions during unit matching (e.g. "mb" matching "m")
-var allUnits = []string{"week", "day", "min", "tb", "gb", "mb", "kb", "in", "cm", "ft", "km", "mi", "ms", "oz", "lb", "kg", "b", "m", "g", "h", "s", "c", "f", "k"}
+	}
+	tempUnits = map[string]bool{"c": true, "f": true, "k": true}
+	tempOrder = []string{"c", "f", "k"}
+	// Ordered by decreasing length to avoid prefix collisions during unit matching (e.g. "mb" matching "m")
+	allUnits = []string{"week", "day", "min", "tb", "gb", "mb", "kb", "in", "cm", "ft", "km", "mi", "ms", "oz", "lb", "kg", "b", "m", "g", "h", "s", "c", "f", "k"}
+)
 
 func convertTemp(value float64, from, to string) (float64, bool) {
 	if !tempUnits[from] || !tempUnits[to] {

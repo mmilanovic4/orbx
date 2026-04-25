@@ -27,6 +27,6 @@ func Hash(algo string, data []byte) ([]byte, error) {
 		return sum[:], nil
 
 	default:
-		return nil, fmt.Errorf("unsupported algorithm")
+		return nil, fmt.Errorf("unsupported algorithm %q: use md5, sha1, sha256, sha512", algo)
 	}
 }

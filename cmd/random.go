@@ -17,7 +17,9 @@ const (
 	charsetSymbols  = charsetAlphanum + "!@#$%^&*()-_=+[]{}|;:,.<>?"
 )
 
-var randomCharset string
+var (
+	randomCharset string
+)
 
 const MAX_LENGTH int = 10000
 

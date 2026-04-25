@@ -12,7 +12,7 @@ func EncodeHex(data []byte) string {
 func DecodeHex(input string) ([]byte, error) {
 	data, err := hex.DecodeString(input)
 	if err != nil {
-		return nil, fmt.Errorf("invalid hex input")
+		return nil, fmt.Errorf("invalid hex input: %w", err)
 	}
 	return data, nil
 }

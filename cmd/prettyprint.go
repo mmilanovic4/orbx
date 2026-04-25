@@ -10,7 +10,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var prettyFile string
+var (
+	prettyFile string
+)
 
 var prettyCmd = &cobra.Command{
 	Use:     "prettyprint [input]",

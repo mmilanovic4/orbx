@@ -7,7 +7,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var hexFile string
+var (
+	hexFile string
+)
 
 var hexCmd = &cobra.Command{
 	Use:     "hex [encode|decode] [text]",

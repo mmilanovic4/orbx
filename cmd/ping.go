@@ -8,7 +8,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var pingCount int
+var (
+	pingCount int
+)
 
 var pingCmd = &cobra.Command{
 	Use:     "ping [url]",

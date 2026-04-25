@@ -8,7 +8,7 @@ import (
 func ParsePort(input string) (int, error) {
 	port, err := strconv.Atoi(input)
 	if err != nil {
-		return 0, fmt.Errorf("invalid port: %s", input)
+		return 0, fmt.Errorf("invalid port %q: must be a number", input)
 	}
 
 	if port < 1 || port > 65535 {

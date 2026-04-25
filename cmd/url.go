@@ -10,7 +10,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var urlTyped bool
+var (
+	urlTyped bool
+)
 
 func parseTypedValue(v string) any {
 	if v == "" {

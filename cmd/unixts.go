@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"orbx/internal/timeutil"
+	"orbx/internal/dateutil"
 	"strconv"
 	"time"
 
@@ -37,13 +37,13 @@ var unixtsCmd = &cobra.Command{
 				return fmt.Errorf("invalid timestamp: %w", err)
 			}
 
-			loc, err := timeutil.GetLocation(tz)
+			loc, err := dateutil.GetLocation(tz)
 			if err != nil {
 				return fmt.Errorf("invalid timezone %q: %w", tz, err)
 			}
 
 			t := time.Unix(ts, 0).In(loc)
-			fmt.Println(t.Format(timeutil.GetLayout(ms)))
+			fmt.Println(t.Format(dateutil.GetLayout(ms)))
 
 		case "from":
 			if len(args) < 2 {

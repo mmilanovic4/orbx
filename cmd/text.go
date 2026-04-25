@@ -8,7 +8,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var substring string
+var (
+	substring string
+)
 
 var textCmd = &cobra.Command{
 	Use:     "text [operation] [input]",

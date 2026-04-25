@@ -7,7 +7,7 @@ func ShannonEntropy(data []byte) float64 {
 		return 0
 	}
 
-	freq := make(map[byte]int)
+	var freq [256]int
 	for _, b := range data {
 		freq[b]++
 	}
@@ -15,8 +15,12 @@ func ShannonEntropy(data []byte) float64 {
 	n := float64(len(data))
 	var entropy float64
 	for _, count := range freq {
+		if count == 0 {
+			continue
+		}
 		p := float64(count) / n
 		entropy -= p * math.Log2(p)
 	}
+
 	return entropy
 }

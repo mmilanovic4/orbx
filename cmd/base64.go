@@ -7,7 +7,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var base64File string
+var (
+	base64File string
+)
 
 var base64Cmd = &cobra.Command{
 	Use:     "base64 [encode|decode] [text]",

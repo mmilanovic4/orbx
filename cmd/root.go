@@ -7,9 +7,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const VERSION string = "v0.1.0"
+const (
+	VERSION string = "v0.1.0"
+)
 
-var showVersion bool
+var (
+	showVersion bool
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "orbx",

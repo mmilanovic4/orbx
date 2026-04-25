@@ -7,7 +7,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var htmlFile string
+var (
+	htmlFile string
+)
 
 var htmlCmd = &cobra.Command{
 	Use:     "html [encode|decode] [text]",

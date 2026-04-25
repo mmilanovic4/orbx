@@ -8,7 +8,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var downloadFile string
+var (
+	downloadFile string
+)
 
 var downloadCmd = &cobra.Command{
 	Use:     "download [url]",

@@ -1,8 +1,8 @@
 # orbx
 
-orbx is a lightweight CLI utility for quick system tasks.
+orbx is a lightweight CLI toolkit for developers — encryption, encoding, network diagnostics, and everyday utilities, all from the terminal.
 
-Some of the available commands include clipboard utilities, a lightweight static web server for serving local directories and system/network information tools.
+Built with [Go](https://go.dev/) and [Cobra](https://github.com/spf13/cobra).
 
 ---
 
