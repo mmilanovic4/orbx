@@ -13,28 +13,24 @@ var rdnsCmd = &cobra.Command{
 	Short:   "Reverse DNS lookup for an IP address",
 	GroupID: "network",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		ip := strings.TrimSpace(args[0])
 
-		// strict parse
 		if net.ParseIP(ip) == nil {
-			fmt.Println("Invalid IP address")
-			return
+			return fmt.Errorf("invalid IP address: %s", ip)
 		}
 
 		names, err := net.LookupAddr(ip)
 		if err != nil {
-			fmt.Println("Error:", err)
-			return
+			return fmt.Errorf("lookup failed: %w", err)
 		}
 
 		if len(names) == 0 {
-			fmt.Println("Hostname not found")
-			return
+			return fmt.Errorf("no hostname found for %s", ip)
 		}
 
-		host := strings.TrimSuffix(names[0], ".")
-		fmt.Println(host)
+		fmt.Println(strings.TrimSuffix(names[0], "."))
+		return nil
 	},
 }
 

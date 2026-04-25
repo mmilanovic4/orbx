@@ -15,17 +15,15 @@ var serveCmd = &cobra.Command{
 	Short:   "Start a static file server in current directory",
 	GroupID: "dev",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		port, err := netutil.ParsePort(args[0])
 		if err != nil {
-			fmt.Println(err)
-			return
+			return err
 		}
 
 		dir, err := os.Getwd()
 		if err != nil {
-			fmt.Println("Failed to get directory:", err)
-			return
+			return fmt.Errorf("failed to get directory: %w", err)
 		}
 
 		fmt.Println("Serving:", dir)
@@ -33,10 +31,11 @@ var serveCmd = &cobra.Command{
 
 		fs := http.FileServer(http.Dir(dir))
 
-		err = http.ListenAndServe(":"+strconv.Itoa(port), fs)
-		if err != nil {
-			fmt.Println("Server error:", err)
+		if err := http.ListenAndServe(":"+strconv.Itoa(port), fs); err != nil {
+			return fmt.Errorf("server error: %w", err)
 		}
+
+		return nil
 	},
 }
 

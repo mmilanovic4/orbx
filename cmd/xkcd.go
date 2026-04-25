@@ -22,17 +22,15 @@ var xkcdCmd = &cobra.Command{
 	Use:     "xkcd",
 	Short:   "Fetch latest XKCD comic",
 	GroupID: "misc",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		resp, err := netutil.Get("https://xkcd.com/info.0.json")
 		if err != nil {
-			fmt.Println("Error:", err)
-			return
+			return fmt.Errorf("failed to fetch comic: %w", err)
 		}
 
 		var comic XKCD
 		if err := json.Unmarshal(resp.Body, &comic); err != nil {
-			fmt.Println("Decode error:", err)
-			return
+			return fmt.Errorf("failed to decode response: %w", err)
 		}
 
 		fmt.Printf("\n#%d - %s\n", comic.Num, comic.Title)
@@ -43,6 +41,8 @@ var xkcdCmd = &cobra.Command{
 		if open {
 			exec.Command("open", comic.Img).Start()
 		}
+
+		return nil
 	},
 }
 

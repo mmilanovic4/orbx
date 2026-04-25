@@ -9,59 +9,50 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var tz string
-var ms bool
+var (
+	tz string
+	ms bool
+)
 
 var unixtsCmd = &cobra.Command{
 	Use:     "unixts [to|from] [value]",
 	Short:   "Unix timestamp utilities",
 	GroupID: "dev",
-	Run: func(cmd *cobra.Command, args []string) {
-		// DEFAULT: current unix timestamp
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
 			fmt.Println(time.Now().Unix())
-			return
+			return nil
 		}
 
 		mode := args[0]
 
 		switch mode {
-		// unix → human
 		case "to":
 			if len(args) < 2 {
-				fmt.Println("missing timestamp")
-				return
+				return fmt.Errorf("missing timestamp")
 			}
 
 			ts, err := strconv.ParseInt(args[1], 10, 64)
 			if err != nil {
-				fmt.Println("invalid timestamp")
-				return
+				return fmt.Errorf("invalid timestamp: %w", err)
 			}
 
 			loc, err := timeutil.GetLocation(tz)
 			if err != nil {
-				fmt.Println("invalid timezone:", tz)
-				return
+				return fmt.Errorf("invalid timezone %q: %w", tz, err)
 			}
 
 			t := time.Unix(ts, 0).In(loc)
-
 			fmt.Println(t.Format(timeutil.GetLayout(ms)))
-		// human → unix
+
 		case "from":
 			if len(args) < 2 {
-				fmt.Println("missing datetime")
-				return
+				return fmt.Errorf("missing datetime")
 			}
 
-			input := args[1]
-
-			t, err := time.Parse(time.RFC3339, input)
+			t, err := time.Parse(time.RFC3339, args[1])
 			if err != nil {
-				fmt.Println("invalid format, use RFC3339 like:")
-				fmt.Println("2026-04-19T21:57:11+02:00")
-				return
+				return fmt.Errorf("invalid format, use RFC3339 (e.g. 2026-04-19T21:57:11+02:00)")
 			}
 
 			if ms {
@@ -69,9 +60,12 @@ var unixtsCmd = &cobra.Command{
 			} else {
 				fmt.Println(t.Unix())
 			}
+
 		default:
-			fmt.Println("use: unixts [to|from]")
+			return fmt.Errorf("unknown mode %q — use: to, from", mode)
 		}
+
+		return nil
 	},
 }
 

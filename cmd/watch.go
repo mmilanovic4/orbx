@@ -18,11 +18,10 @@ var watchCmd = &cobra.Command{
 	GroupID:            "util",
 	Args:               cobra.MinimumNArgs(2),
 	DisableFlagParsing: true,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		interval, err := strconv.ParseFloat(args[0], 64)
 		if err != nil || interval <= 0 {
-			fmt.Println("Invalid interval.")
-			return
+			return fmt.Errorf("invalid interval %q: must be a positive number", args[0])
 		}
 
 		command := args[1:]
@@ -33,8 +32,7 @@ var watchCmd = &cobra.Command{
 			sysutil.ClearScreen()
 			fmt.Printf("Every %.1fs: %s\n\n", interval, strings.Join(command, " "))
 
-			var c *exec.Cmd
-			c = exec.Command(command[0], command[1:]...)
+			c := exec.Command(command[0], command[1:]...)
 			c.Stdout = os.Stdout
 			c.Stderr = os.Stderr
 			c.Run()
@@ -44,6 +42,8 @@ var watchCmd = &cobra.Command{
 		for range ticker.C {
 			run()
 		}
+
+		return nil
 	},
 }
 

@@ -17,12 +17,10 @@ func parseTypedValue(v string) any {
 		return true
 	}
 
-	// null/undefined
 	if v == "null" || v == "nil" || v == "undefined" {
 		return nil
 	}
 
-	// bool (case-insensitive)
 	switch strings.ToLower(v) {
 	case "true":
 		return true
@@ -30,12 +28,12 @@ func parseTypedValue(v string) any {
 		return false
 	}
 
-	// float64
 	if f, err := strconv.ParseFloat(v, 64); err == nil {
 		if strconv.FormatFloat(f, 'g', -1, 64) == v {
 			return f
 		}
-		return v // big numbers are kept as strings
+		// big numbers are kept as strings to avoid precision loss
+		return v
 	}
 
 	return v
@@ -45,21 +43,20 @@ var urlCmd = &cobra.Command{
 	Use:     "url [url]",
 	Short:   "Decode and parse a URL",
 	GroupID: "dev",
-	Run: func(cmd *cobra.Command, args []string) {
+	Args:    cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
 		raw := args[0]
 
 		decoded, err := url.QueryUnescape(raw)
 		if err != nil {
-			fmt.Println("Invalid URL encoding:", err)
-			return
+			return fmt.Errorf("invalid URL encoding: %w", err)
 		}
 
 		fmt.Println("Decoded URL:", decoded)
 
 		u, err := url.Parse(decoded)
 		if err != nil {
-			fmt.Println("Invalid URL:", err)
-			return
+			return fmt.Errorf("invalid URL: %w", err)
 		}
 
 		fmt.Println("Scheme:", u.Scheme)
@@ -91,13 +88,13 @@ var urlCmd = &cobra.Command{
 
 		jsonBytes, err := json.MarshalIndent(queryMap, "", "  ")
 		if err != nil {
-			fmt.Println("Failed to encode query:", err)
-			return
+			return fmt.Errorf("failed to encode query: %w", err)
 		}
 
 		fmt.Println("Query params:")
 		fmt.Println(string(jsonBytes))
 
+		return nil
 	},
 }
 

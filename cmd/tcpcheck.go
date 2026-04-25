@@ -13,22 +13,21 @@ var tcpcheckCmd = &cobra.Command{
 	Short:   "Check TCP port connectivity",
 	GroupID: "network",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		target := args[0]
 
 		start := time.Now()
-
 		conn, err := net.DialTimeout("tcp", target, 2*time.Second)
 		latency := time.Since(start)
 
 		if err != nil {
 			fmt.Printf("🔴 %s (%s)\n", target, latency)
-			return
+			return nil
 		}
-
 		defer conn.Close()
 
 		fmt.Printf("🟢 %s (%s)\n", target, latency)
+		return nil
 	},
 }
 

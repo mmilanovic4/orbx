@@ -15,7 +15,7 @@ var textCmd = &cobra.Command{
 	Short:   "String utilities",
 	GroupID: "util",
 	Args:    cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		op := args[0]
 		input := args[1]
 
@@ -55,8 +55,10 @@ var textCmd = &cobra.Command{
 		case "contains":
 			fmt.Println(strings.Contains(input, substring))
 		default:
-			fmt.Println("Unknown operation. Use: upper, lower, title, trim, reverse, slug, count, words, contains [-s substring]")
+			return fmt.Errorf("unknown operation %q — use: upper, lower, title, trim, reverse, slug, count, words, contains [-s substring]", op)
 		}
+
+		return nil
 	},
 }
 

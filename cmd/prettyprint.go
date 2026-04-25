@@ -16,8 +16,9 @@ var prettyCmd = &cobra.Command{
 	Use:     "prettyprint [input]",
 	Short:   "Format and pretty print JSON or XML",
 	GroupID: "dev",
+	Aliases: []string{"pp"},
 	Args:    cobra.RangeArgs(0, 1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		var input string
 		if len(args) > 0 {
 			input = args[0]
@@ -25,8 +26,7 @@ var prettyCmd = &cobra.Command{
 
 		data, err := encodingutil.GetInputData(input, prettyFile)
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("failed to read input: %w", err)
 		}
 
 		trimmed := strings.TrimSpace(string(data))
@@ -34,16 +34,14 @@ var prettyCmd = &cobra.Command{
 		if strings.HasPrefix(trimmed, "{") || strings.HasPrefix(trimmed, "[") {
 			var obj any
 			if err := json.Unmarshal(data, &obj); err != nil {
-				fmt.Println("Invalid JSON:", err)
-				return
+				return fmt.Errorf("invalid JSON: %w", err)
 			}
 			pretty, err := json.MarshalIndent(obj, "", "  ")
 			if err != nil {
-				fmt.Println(err)
-				return
+				return err
 			}
 			fmt.Println(string(pretty))
-			return
+			return nil
 		}
 
 		if strings.HasPrefix(trimmed, "<") {
@@ -57,21 +55,19 @@ var prettyCmd = &cobra.Command{
 					break
 				}
 				if err := encoder.EncodeToken(token); err != nil {
-					fmt.Println("Invalid XML:", err)
-					return
+					return fmt.Errorf("invalid XML: %w", err)
 				}
 			}
 			encoder.Flush()
 			fmt.Println(buf.String())
-			return
+			return nil
 		}
 
-		fmt.Println("Unsupported format: input must be JSON or XML")
+		return fmt.Errorf("unsupported format: input must be JSON or XML")
 	},
 }
 
 func init() {
 	prettyCmd.Flags().StringVarP(&prettyFile, "file", "f", "", "read input from file")
-	prettyCmd.Aliases = []string{"pp"}
 	rootCmd.AddCommand(prettyCmd)
 }

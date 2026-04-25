@@ -26,16 +26,14 @@ var randomCmd = &cobra.Command{
 	Short:   "Generate a cryptographically secure random string",
 	GroupID: "util",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		length, err := strconv.Atoi(args[0])
 		if err != nil {
-			fmt.Println(err)
-			return
+			return fmt.Errorf("invalid length %q: must be an integer", args[0])
 		}
 
 		if length <= 0 || length > MAX_LENGTH {
-			fmt.Printf("length not valid, should be between 0 and %d\n", MAX_LENGTH)
-			return
+			return fmt.Errorf("length must be between 1 and %d", MAX_LENGTH)
 		}
 
 		var charset string
@@ -56,13 +54,13 @@ var randomCmd = &cobra.Command{
 		for i := range result {
 			n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
 			if err != nil {
-				fmt.Println(err)
-				return
+				return fmt.Errorf("failed to generate random string: %w", err)
 			}
 			result[i] = charset[n.Int64()]
 		}
 
 		fmt.Println(string(result))
+		return nil
 	},
 }
 

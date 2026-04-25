@@ -17,7 +17,7 @@ var uuidCmd = &cobra.Command{
 	Use:     "uuid",
 	Short:   "Generate a UUID v4",
 	GroupID: "dev",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		id := uuid.New().String()
 		if uuidCompact {
 			id = strings.ReplaceAll(id, "-", "")
@@ -26,6 +26,7 @@ var uuidCmd = &cobra.Command{
 			id = strings.ToUpper(id)
 		}
 		fmt.Println(id)
+		return nil
 	},
 }
 
