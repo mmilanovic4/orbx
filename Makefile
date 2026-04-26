@@ -12,6 +12,10 @@ release:
 size: build
 	du -sh $(BINARY)
 
+lint:
+	go fmt ./...
+	go mod tidy
+
 clean:
 	rm -f $(BINARY)
 

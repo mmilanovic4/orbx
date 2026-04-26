@@ -42,11 +42,12 @@ var compressCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("failed to decompress: %w", err)
 			}
-			fmt.Println(string(result))
 			if compressOut != "" {
 				if err := sysutil.WriteFile(compressOut, result); err != nil {
 					return fmt.Errorf("failed to write output file: %w", err)
 				}
+			} else {
+				fmt.Println(string(result))
 			}
 		} else {
 			result, err = gzipCompress(data)
@@ -54,11 +55,12 @@ var compressCmd = &cobra.Command{
 				return fmt.Errorf("failed to compress: %w", err)
 			}
 			if compressRaw {
-				os.Stdout.Write(result)
 				if compressOut != "" {
 					if err := sysutil.WriteFile(compressOut, result); err != nil {
 						return fmt.Errorf("failed to write output file: %w", err)
 					}
+				} else {
+					os.Stdout.Write(result)
 				}
 			} else {
 				encoded := encodingutil.EncodeBase64(result)
