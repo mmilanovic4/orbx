@@ -37,6 +37,7 @@ Usage:
   random      Generate a cryptographically secure random string
   text        String utilities
   watch       Repeatedly run a command every N seconds
+  wc          Count lines, words and characters
 
 🌐 Network Tools
   dns         Resolve DNS records for a domain
@@ -47,6 +48,7 @@ Usage:
   tcpcheck    Check TCP port connectivity
 
 💻 Developer Tools
+  favicon     Generate favicon.ico and Apple touch icons from a PNG
   html        Encode or decode HTML entities
   jwt         Decode a JWT token (header and payload, no verification)
   ports       Show processes using network ports

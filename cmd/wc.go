@@ -13,7 +13,7 @@ var wcFile string
 
 var wcCmd = &cobra.Command{
 	Use:     "wc [input]",
-	Short:   "Count lines, words, and characters",
+	Short:   "Count lines, words and characters",
 	GroupID: "util",
 	Args:    cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {

@@ -33,7 +33,7 @@ var faviconSizes = []struct {
 var faviconCmd = &cobra.Command{
 	Use:     "favicon [input.png]",
 	Short:   "Generate favicon.ico and Apple touch icons from a PNG",
-	GroupID: "util",
+	GroupID: "dev",
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		f, err := os.Open(args[0])
