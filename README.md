@@ -45,6 +45,7 @@ Usage:
   ip          Show public and local IP addresses
   ping        HTTP latency check (like ping, but for URLs)
   rdns        Reverse DNS lookup for an IP address
+  sshlist     List configured SSH hosts from ~/.ssh/config
   tcpcheck    Check TCP port connectivity
 
 💻 Developer Tools
@@ -67,7 +68,7 @@ Additional Commands:
 
 Flags:
   -h, --help      help for orbx
-  -v, --version   show version
+  -v, --version   version for orbx
 
 Use "orbx [command] --help" for more information about a command.
 ```
