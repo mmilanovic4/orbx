@@ -13,10 +13,37 @@ import (
 )
 
 type SSHHost struct {
-	Name     string
-	HostName string
-	User     string
-	Port     string
+	Name         string
+	HostName     string
+	User         string
+	Port         string
+	IdentityFile string
+}
+
+func (h SSHHost) String(i int) string {
+	host := h.HostName
+	if host == "" {
+		host = h.Name
+	}
+
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "%d. ", i)
+
+	if h.User != "" {
+		fmt.Fprintf(&sb, "%s@", h.User)
+	}
+
+	sb.WriteString(host)
+
+	if h.Port != "" {
+		fmt.Fprintf(&sb, ":%s", h.Port)
+	}
+
+	if h.IdentityFile != "" {
+		fmt.Fprintf(&sb, " (%s)", h.IdentityFile)
+	}
+
+	return sb.String()
 }
 
 var sshlistCmd = &cobra.Command{
@@ -31,7 +58,7 @@ var sshlistCmd = &cobra.Command{
 			return fmt.Errorf("failed to stat SSH config: %w", err)
 		}
 		if info.Mode().Perm() != 0600 {
-			fmt.Printf("Warning: ~/.ssh/config has permissions %o, should be 600\n\n", info.Mode().Perm())
+			fmt.Printf("⚠ Warning: ~/.ssh/config has permissions %o, should be 600\n\n", info.Mode().Perm())
 		}
 
 		data, err := sysutil.ReadFile(configPath)
@@ -76,6 +103,10 @@ var sshlistCmd = &cobra.Command{
 				if current != nil {
 					current.Port = val
 				}
+			case "identityfile":
+				if current != nil {
+					current.IdentityFile = val
+				}
 			}
 		}
 
@@ -93,21 +124,7 @@ var sshlistCmd = &cobra.Command{
 		}
 
 		for i, h := range hosts {
-			user := h.User
-			if user == "" {
-				user = os.Getenv("USER")
-			}
-
-			host := h.HostName
-			if host == "" {
-				host = h.Name
-			}
-
-			if h.Port != "" {
-				fmt.Printf("%d. %s@%s:%s\n", i+1, user, host, h.Port)
-			} else {
-				fmt.Printf("%d. %s@%s\n", i+1, user, host)
-			}
+			fmt.Println(h.String(i + 1))
 		}
 
 		return nil
