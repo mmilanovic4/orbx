@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -11,19 +10,12 @@ const (
 	VERSION string = "v0.1.0"
 )
 
-var (
-	showVersion bool
-)
-
 var rootCmd = &cobra.Command{
-	Use:   "orbx",
-	Short: "System utility CLI",
-	Long:  "orbx is a lightweight CLI utility for quick system tasks.",
+	Use:     "orbx",
+	Short:   "System utility CLI",
+	Long:    "orbx is a lightweight CLI utility for quick system tasks.",
+	Version: VERSION,
 	Run: func(cmd *cobra.Command, args []string) {
-		if showVersion {
-			fmt.Println("orbx", VERSION)
-			return
-		}
 		cmd.Help()
 	},
 }
@@ -36,9 +28,6 @@ func Execute() {
 }
 
 func init() {
-	// Version flag
-	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "show version")
-
 	// 🧰 Utilities
 	rootCmd.AddGroup(&cobra.Group{
 		ID:    "util",
