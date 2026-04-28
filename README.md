@@ -42,6 +42,7 @@ Usage:
 🌐 Network Tools
   dns         Resolve DNS records for a domain
   headers     Show HTTP response status and headers
+  hosts       List entries from /etc/hosts
   ip          Show public and local IP addresses
   ping        HTTP latency check (like ping, but for URLs)
   rdns        Reverse DNS lookup for an IP address
