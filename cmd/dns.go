@@ -9,8 +9,15 @@ import (
 )
 
 var dnsCmd = &cobra.Command{
-	Use:     "dns [domain] [type]",
-	Short:   "Resolve DNS records for a domain",
+	Use:   "dns [domain] [type]",
+	Short: "Resolve DNS records for a domain",
+	Long: `Resolve DNS records for a domain.
+
+Supported record types:
+  A / AAAA  (default)
+  MX
+  CNAME
+  TXT`,
 	GroupID: "network",
 	Args:    cobra.RangeArgs(1, 2),
 	RunE: func(cmd *cobra.Command, args []string) error {
