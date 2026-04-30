@@ -19,6 +19,7 @@ var hostsCmd = &cobra.Command{
 	Use:     "hosts",
 	Short:   "List entries from /etc/hosts",
 	GroupID: "network",
+	Args:    cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		data, err := sysutil.ReadFile("/etc/hosts")
 		if err != nil {

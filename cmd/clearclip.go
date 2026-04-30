@@ -12,6 +12,7 @@ var clearclipCmd = &cobra.Command{
 	Use:     "clearclip",
 	Short:   "Clear system clipboard",
 	GroupID: "util",
+	Args:    cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		switch runtime.GOOS {
 		case "darwin":

@@ -12,6 +12,7 @@ var ipCmd = &cobra.Command{
 	Use:     "ip",
 	Short:   "Show public and local IP addresses",
 	GroupID: "network",
+	Args:    cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		resp, err := netutil.Get("https://api.ipify.org")
 		if err != nil {

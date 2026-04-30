@@ -50,6 +50,7 @@ var sshlistCmd = &cobra.Command{
 	Use:     "sshlist",
 	Short:   "List configured SSH hosts from ~/.ssh/config",
 	GroupID: "network",
+	Args:    cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		configPath := filepath.Join(os.Getenv("HOME"), ".ssh", "config")
 

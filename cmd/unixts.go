@@ -18,6 +18,7 @@ var unixtsCmd = &cobra.Command{
 	Use:     "unixts [to|from] [value]",
 	Short:   "Unix timestamp utilities",
 	GroupID: "dev",
+	Args:    cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
 			fmt.Println(time.Now().Unix())

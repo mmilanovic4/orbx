@@ -26,14 +26,54 @@ const (
 
 var (
 	hnCount int
+	hnOpen  bool
 )
 
 var hnCmd = &cobra.Command{
-	Use:     "hn",
+	Use:     "hn [id]",
 	Short:   "Fetch top stories from Hacker News",
 	GroupID: "misc",
-	Args:    cobra.NoArgs,
+	Args:    cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if hnOpen && len(args) == 0 {
+			return fmt.Errorf("--open requires a story ID")
+		}
+
+		if len(args) == 1 {
+			id, err := strconv.Atoi(args[0])
+			if err != nil || id <= 0 {
+				return fmt.Errorf("invalid story ID: %s", args[0])
+			}
+
+			storyResp, err := netutil.Get(HN_BASE_URL + "/v0/item/" + strconv.Itoa(id) + ".json")
+			if err != nil {
+				return fmt.Errorf("failed to fetch story: %w", err)
+			}
+
+			var story HNStory
+			if err := json.Unmarshal(storyResp.Body, &story); err != nil {
+				return fmt.Errorf("failed to decode story: %w", err)
+			}
+
+			url := story.URL
+			if url == "" {
+				url = HN_ITEM_URL + strconv.Itoa(story.ID)
+			}
+
+			if hnOpen {
+				fmt.Printf("Opening: %s\n", story.Title)
+				if err := exec.Command("open", url).Start(); err != nil {
+					return fmt.Errorf("failed to open browser: %w", err)
+				}
+				return nil
+			}
+
+			fmt.Printf("%s\n", story.Title)
+			fmt.Printf("%d points by %s\n", story.Score, story.By)
+			fmt.Printf("%s\n", url)
+			return nil
+		}
+
 		resp, err := netutil.Get(HN_BASE_URL + "/v0/topstories.json")
 		if err != nil {
 			return fmt.Errorf("failed to fetch top stories: %w", err)
@@ -76,44 +116,8 @@ var hnCmd = &cobra.Command{
 	},
 }
 
-var hnOpenCmd = &cobra.Command{
-	Use:   "open [id]",
-	Short: "Open a Hacker News story by ID in the browser",
-	Args:  cobra.ExactArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		id, err := strconv.Atoi(args[0])
-		if err != nil || id <= 0 {
-			return fmt.Errorf("invalid story ID: %s", args[0])
-		}
-
-		storyResp, err := netutil.Get(HN_BASE_URL + "/v0/item/" + strconv.Itoa(id) + ".json")
-		if err != nil {
-			return fmt.Errorf("failed to fetch story: %w", err)
-		}
-
-		var story HNStory
-		if err := json.Unmarshal(storyResp.Body, &story); err != nil {
-			return fmt.Errorf("failed to decode story: %w", err)
-		}
-
-		url := story.URL
-		if url == "" {
-			url = HN_ITEM_URL + strconv.Itoa(story.ID)
-		}
-
-		fmt.Printf("Opening: %s\n", story.Title)
-		fmt.Printf("URL: %s\n", url)
-
-		if err := exec.Command("open", url).Start(); err != nil {
-			return fmt.Errorf("failed to open browser: %w", err)
-		}
-
-		return nil
-	},
-}
-
 func init() {
 	hnCmd.Flags().IntVar(&hnCount, "count", 10, "number of stories to fetch")
-	hnCmd.AddCommand(hnOpenCmd)
+	hnCmd.Flags().BoolVar(&hnOpen, "open", false, "open story in browser (requires id)")
 	rootCmd.AddCommand(hnCmd)
 }
