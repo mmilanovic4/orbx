@@ -61,6 +61,7 @@ Usage:
   uuid        Generate a UUID v4
 
 📦 Content
+  hn          Fetch top stories from Hacker News
   xkcd        Fetch latest XKCD comic
 
 Additional Commands:

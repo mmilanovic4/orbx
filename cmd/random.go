@@ -11,17 +11,16 @@ import (
 )
 
 const (
-	charsetAlpha    = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	charsetAlphanum = charsetAlpha + "0123456789"
-	charsetHex      = "0123456789abcdef"
-	charsetSymbols  = charsetAlphanum + "!@#$%^&*()-_=+[]{}|;:,.<>?"
+	CHARSET_ALPHA        = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	CHARSET_ALPHANUM     = CHARSET_ALPHA + "0123456789"
+	CHARSET_HEX          = "0123456789abcdef"
+	CHARSET_SYMBOLS      = CHARSET_ALPHANUM + "!@#$%^&*()-_=+[]{}|;:,.<>?"
+	MAX_LENGTH       int = 10000
 )
 
 var (
 	randomCharset string
 )
-
-const MAX_LENGTH int = 10000
 
 var randomCmd = &cobra.Command{
 	Use:     "random [length]",
@@ -41,15 +40,15 @@ var randomCmd = &cobra.Command{
 		var charset string
 		switch strings.ToLower(randomCharset) {
 		case "alpha":
-			charset = charsetAlpha
+			charset = CHARSET_ALPHA
 		case "alphanum":
-			charset = charsetAlphanum
+			charset = CHARSET_ALPHANUM
 		case "hex":
-			charset = charsetHex
+			charset = CHARSET_HEX
 		case "symbols":
-			charset = charsetSymbols
+			charset = CHARSET_SYMBOLS
 		default:
-			charset = charsetAlphanum
+			charset = CHARSET_ALPHANUM
 		}
 
 		result := make([]byte, length)
