@@ -30,7 +30,7 @@ var xkcdCmd = &cobra.Command{
 	GroupID: "misc",
 	Args:    cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		resp, err := netutil.Get(HN_BASE_URL + "/info.0.json")
+		resp, err := netutil.Get(XKCD_BASE_URL + "/info.0.json")
 		if err != nil {
 			return fmt.Errorf("failed to fetch comic: %w", err)
 		}
