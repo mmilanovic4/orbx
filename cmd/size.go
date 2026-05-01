@@ -39,7 +39,7 @@ var sizeCmd = &cobra.Command{
 			target = args[0]
 		}
 
-		info, err := os.Lstat(target)
+		info, err := os.Stat(target)
 		if err != nil {
 			return fmt.Errorf("failed to access path: %w", err)
 		}
