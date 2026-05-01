@@ -35,6 +35,7 @@ Usage:
   hash        Generate hash of a string
   hex         Encode or decode hex
   random      Generate a cryptographically secure random string
+  size        Show logical size of a file or directory
   text        String utilities
   watch       Repeatedly run a command every N seconds
   wc          Count lines, words and characters
