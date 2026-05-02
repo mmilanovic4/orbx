@@ -28,38 +28,56 @@ func dirSize(path string) (int64, error) {
 	return size, err
 }
 
+func pathSize(target string) (int64, error) {
+	info, err := os.Stat(target)
+	if err != nil {
+		return 0, fmt.Errorf("failed to access path: %w", err)
+	}
+	if info.IsDir() {
+		return dirSize(target)
+	}
+	return info.Size(), nil
+}
+
 var sizeCmd = &cobra.Command{
-	Use:     "size [path]",
+	Use:     "size [path...]",
 	Short:   "Show logical size of a file or directory",
 	GroupID: "util",
-	Args:    cobra.RangeArgs(0, 1),
+	Args:    cobra.ArbitraryArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		target := "."
-		if len(args) > 0 {
-			target = args[0]
+		if len(args) == 0 {
+			args = []string{"."}
 		}
 
-		info, err := os.Stat(target)
-		if err != nil {
-			return fmt.Errorf("failed to access path: %w", err)
-		}
-
-		abs, err := filepath.Abs(target)
-		if err != nil {
-			return fmt.Errorf("failed to resolve path: %w", err)
-		}
-
-		var totalSize int64
-		if info.IsDir() {
-			totalSize, err = dirSize(target)
+		if len(args) == 1 {
+			size, err := pathSize(args[0])
 			if err != nil {
-				return fmt.Errorf("failed to calculate size: %w", err)
+				return err
 			}
-		} else {
-			totalSize = info.Size()
+			abs, err := filepath.Abs(args[0])
+			if err != nil {
+				return fmt.Errorf("failed to resolve path: %w", err)
+			}
+			fmt.Printf("%s\t%s\n", formatutil.FormatLogicalSize(size), abs)
+			return nil
 		}
 
-		fmt.Printf("%s\t%s\n", formatutil.FormatLogicalSize(totalSize), abs)
+		var total int64
+		for _, target := range args {
+			size, err := pathSize(target)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "warning: %s\n", err)
+				continue
+			}
+			abs, err := filepath.Abs(target)
+			if err != nil {
+				return fmt.Errorf("failed to resolve path: %w", err)
+			}
+			fmt.Printf("%s\t%s\n", formatutil.FormatLogicalSize(size), abs)
+			total += size
+		}
+
+		fmt.Printf("%s\ttotal\n", formatutil.FormatLogicalSize(total))
 
 		return nil
 	},

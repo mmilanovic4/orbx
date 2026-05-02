@@ -170,6 +170,27 @@ cat largefile.txt | orbx compress | orbx aes encrypt --key secret.key --out out.
 orbx aes decrypt --file out.enc --key secret.key | orbx compress --decode
 ```
 
+## Size
+
+Calculates the **logical (apparent) size** of a file or directory — the actual data size, not the disk usage reported by `du`. Useful for estimating cloud storage costs, transfer sizes and archive sizes before compression.
+
+```bash
+# Current directory
+orbx size
+
+# Specific directory
+orbx size /path/to/dir
+
+# Single file
+orbx size file.txt
+
+# Glob pattern — size of each file + total
+orbx size dist/*.json
+
+# Multiple targets
+orbx size file1.txt file2.txt dir/
+```
+
 ## 🔧 Requirements
 
 - Go 1.20+
