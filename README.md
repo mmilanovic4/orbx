@@ -26,6 +26,7 @@ Usage:
 🧰 Utilities
   aes         AES-GCM encryption utilities
   base64      Encode or decode base64
+  charfreq    Show character frequency table of input
   clearclip   Clear system clipboard
   compress    Compress or decompress input using gzip
   convert     Convert units: length, weight, temperature, storage, time
