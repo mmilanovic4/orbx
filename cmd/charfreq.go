@@ -14,6 +14,7 @@ import (
 var (
 	charfreqASCII bool
 	charfreqFile  string
+	charfreqTop   int
 )
 
 var charfreqCmd = &cobra.Command{
@@ -61,6 +62,10 @@ var charfreqCmd = &cobra.Command{
 		}
 		fmt.Println(strings.Repeat("─", 48))
 
+		if charfreqTop > 0 && charfreqTop < len(entries) {
+			entries = entries[:charfreqTop]
+		}
+
 		for _, e := range entries {
 			pct := float64(e.count) / float64(total) * 100
 			barWidth := int(float64(e.count) / float64(maxCount) * 20)
@@ -89,5 +94,6 @@ var charfreqCmd = &cobra.Command{
 func init() {
 	charfreqCmd.Flags().BoolVar(&charfreqASCII, "ascii", false, "show ASCII values instead of characters")
 	charfreqCmd.Flags().StringVarP(&charfreqFile, "file", "f", "", "read input from file")
+	charfreqCmd.Flags().IntVar(&charfreqTop, "top", 0, "show only top N characters")
 	rootCmd.AddCommand(charfreqCmd)
 }
