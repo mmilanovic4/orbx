@@ -60,7 +60,7 @@ Usage:
   serve       Start a static file server in current directory
   unixts      Unix timestamp utilities
   url         Decode and parse a URL
-  uuid        Generate a UUID v4
+  uuid        Generate a UUID (v1, v3, v4, v5, v6, v7)
 
 📦 Content
   hn          Fetch top stories from Hacker News
