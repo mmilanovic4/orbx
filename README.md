@@ -52,6 +52,7 @@ Usage:
   tcpcheck    Check TCP port connectivity
 
 💻 Developer Tools
+  color       Convert between color formats (HEX, RGB, RGBA)
   favicon     Generate favicon.ico and Apple touch icons from a PNG
   html        Encode or decode HTML entities
   jwt         Decode a JWT token (header and payload, no verification)
