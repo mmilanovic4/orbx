@@ -158,7 +158,7 @@ Usage:
 				fmt.Printf("HEX  %s\n", rgbaToHex(c))
 				fmt.Printf("RGBA rgba(%d, %d, %d, %.2f)\n", c.R, c.G, c.B, c.A)
 			default:
-				return fmt.Errorf("invalid hex color: expected #RRGGBB or #RRGGBBAA")
+				return fmt.Errorf("invalid hex color: expected #RGB, #RRGGBB or #RRGGBBAA")
 			}
 		}
 
