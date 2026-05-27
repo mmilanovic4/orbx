@@ -42,6 +42,7 @@ Usage:
   wc          Count lines, words and characters
 
 🌐 Network Tools
+  cert        Show TLS certificate info for a domain or file
   dns         Resolve DNS records for a domain
   headers     Show HTTP response status and headers
   hosts       List entries from /etc/hosts
