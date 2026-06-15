@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mmilanovic4/orbx/main/logo.svg" width="48" height="48" />
+</p>
+
 # orbx
 
 orbx is a lightweight CLI toolkit for developers - encryption, encoding, network diagnostics and everyday utilities, all from the terminal.
