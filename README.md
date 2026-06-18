@@ -10,13 +10,13 @@ Built with [Go](https://go.dev) and [Cobra](https://github.com/spf13/cobra).
 
 ---
 
-## ⚡ Install
+## Install
 
 ```bash
 go install github.com/mmilanovic4/orbx@latest
 ```
 
-## 📦 Usage
+## Usage
 
 ```bash
 $ orbx --help
@@ -198,6 +198,6 @@ orbx size dist/*.json
 orbx size file1.txt file2.txt dir/
 ```
 
-## 🔧 Requirements
+## Requirements
 
 - Go 1.20+
