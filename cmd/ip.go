@@ -52,7 +52,7 @@ var ipCmd = &cobra.Command{
 					mac = "No MAC"
 				}
 
-				fmt.Printf(" - %-8s %-39s [%s]\n", "("+i.Name+")", ip.String(), mac)
+				fmt.Printf(" - %-8s %-39s [%s]\n", "["+i.Name+"]", ip.String(), mac)
 			}
 		}
 
