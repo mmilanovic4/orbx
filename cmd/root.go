@@ -45,10 +45,4 @@ func init() {
 		ID:    "dev",
 		Title: "💻 Developer Tools",
 	})
-
-	// 📦 Content
-	rootCmd.AddGroup(&cobra.Group{
-		ID:    "misc",
-		Title: "📦 Content",
-	})
 }

@@ -69,10 +69,6 @@ Usage:
   url         Decode and parse a URL
   uuid        Generate a UUID (v1, v3, v4, v5, v6, v7)
 
-📦 Content
-  hn          Fetch top stories from Hacker News
-  xkcd        Fetch latest XKCD comic
-
 Additional Commands:
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
