@@ -58,6 +58,7 @@ Usage:
 
 💻 Developer Tools
   color       Convert between color formats (HEX, RGB, RGBA)
+  env         Pretty print env file content
   favicon     Generate favicon.ico and Apple touch icons from a PNG
   html        Encode or decode HTML entities
   jwt         Decode a JWT token (header and payload, no verification)
