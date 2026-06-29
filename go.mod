@@ -4,6 +4,7 @@ go 1.26.2
 
 require (
 	github.com/google/uuid v1.6.0
+	github.com/piglig/go-qr v1.1.0
 	github.com/spf13/cobra v1.10.2
 	golang.org/x/image v0.39.0
 )
