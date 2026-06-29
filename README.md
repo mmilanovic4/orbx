@@ -39,6 +39,7 @@ Usage:
   entropy     Calculate Shannon entropy of input
   hash        Generate hash of a string
   hex         Encode or decode hex
+  qr          Generate a QR code from text or URL
   random      Generate a cryptographically secure random string
   size        Show logical size of a file or directory
   text        String utilities
@@ -193,6 +194,27 @@ orbx size dist/*.json
 
 # Multiple targets
 orbx size file1.txt file2.txt dir/
+```
+
+## QR Code
+
+Generates a QR code from text or a URL. By default it renders directly in the terminal using half-block Unicode characters. Use `--out` to save a PNG or SVG file instead.
+
+```bash
+# From argument
+orbx qr 'https://example.com'
+
+# From stdin
+echo -n 'https://example.com' | orbx qr
+
+# Higher error correction
+orbx qr 'https://example.com' --level 4
+
+# Save to PNG
+orbx qr 'https://example.com' --out qr.png
+
+# Save to SVG
+orbx qr 'https://example.com' --out qr.svg
 ```
 
 ## Requirements
