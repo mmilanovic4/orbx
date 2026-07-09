@@ -55,6 +55,7 @@ Usage:
   ping        HTTP latency check (like ping, but for URLs)
   rdns        Reverse DNS lookup for an IP address
   sshlist     List configured SSH hosts from ~/.ssh/config
+  subnet      Calculate subnet details (network, broadcast, host range)
   tcpcheck    Check TCP port connectivity
 
 💻 Developer Tools
@@ -215,6 +216,24 @@ orbx qr 'https://example.com' --out qr.png
 
 # Save to SVG
 orbx qr 'https://example.com' --out qr.svg
+```
+
+## Subnet
+
+Calculates subnet details from an IPv4/IPv6 address in CIDR notation, or an IPv4 address with a netmask (dotted-decimal or hex).
+
+```bash
+# CIDR notation
+orbx subnet 192.168.1.10/24
+
+# IP + dotted-decimal netmask
+orbx subnet 192.168.1.10 255.255.255.0
+
+# IP + hex netmask (e.g. as reported by ifconfig)
+orbx subnet 192.168.1.10 0xffffff00
+
+# IPv6
+orbx subnet 2001:db8::/64
 ```
 
 ## Requirements
