@@ -13,5 +13,7 @@ orbx
 .vscode/
 .idea/
 
+.claude/
+
 # Go modules cache (optional safety)
 vendor/
