@@ -34,6 +34,7 @@ Usage:
   clearclip   Clear system clipboard
   compress    Compress or decompress input using gzip
   convert     Convert units: length, weight, temperature, storage, time
+  copyclip    Copy input to system clipboard
   countdown   Countdown timer (e.g. 1h30m, 5m, 90s)
   download    Download a file from a URL
   entropy     Calculate Shannon entropy of input
