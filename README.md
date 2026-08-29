@@ -38,6 +38,7 @@ Usage:
   countdown   Countdown timer (e.g. 1h30m, 5m, 90s)
   download    Download a file from a URL
   entropy     Calculate Shannon entropy of input
+  exif        Show EXIF metadata tags of an image
   hash        Generate hash of a string
   hex         Encode or decode hex
   qr          Generate a QR code from text or URL
@@ -196,6 +197,39 @@ orbx size dist/*.json
 
 # Multiple targets
 orbx size file1.txt file2.txt dir/
+```
+
+## EXIF
+
+Lists the EXIF metadata of an image as `key: value` pairs — camera, lens, shooting parameters and GPS location. Supports JPEG, TIFF, PNG and WebP.
+
+```bash
+# All known tags
+orbx exif photo.jpg
+
+# Include tags without a known name
+orbx exif photo.jpg --all
+
+# Filter with standard tools
+orbx exif photo.jpg | grep GPS
+```
+
+Sample output:
+
+```
+Make:             Canon
+Model:            Canon EOS R6
+Orientation:      Rotate 90 CW
+ExposureTime:     1/250 s
+FNumber:          f/2.8
+ISO:              400
+FocalLength:      50 mm
+Flash:            fired, auto (0x19)
+LensModel:        RF24-70mm F2.8 L IS USM
+GPSLatitude:      44° 48' 45.00" N
+GPSLongitude:     20° 27' 40.32" E
+GPSAltitude:      117 m
+GPSCoordinates:   44.812500, 20.461200
 ```
 
 ## QR Code
