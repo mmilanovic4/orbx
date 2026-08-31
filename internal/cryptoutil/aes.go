@@ -5,8 +5,8 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"fmt"
-	"orbx/internal/encodingutil"
-	"orbx/internal/sysutil"
+	"github.com/mmilanovic4/orbx/internal/encodingutil"
+	"github.com/mmilanovic4/orbx/internal/sysutil"
 	"strings"
 )
 

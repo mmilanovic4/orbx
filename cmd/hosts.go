@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"orbx/internal/sysutil"
+	"github.com/mmilanovic4/orbx/internal/sysutil"
 	"strings"
 
 	"github.com/spf13/cobra"

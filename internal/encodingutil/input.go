@@ -3,7 +3,7 @@ package encodingutil
 import (
 	"fmt"
 	"io"
-	"orbx/internal/sysutil"
+	"github.com/mmilanovic4/orbx/internal/sysutil"
 	"os"
 )
 

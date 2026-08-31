@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"orbx/internal/dateutil"
+	"github.com/mmilanovic4/orbx/internal/dateutil"
 	"strconv"
 	"time"
 

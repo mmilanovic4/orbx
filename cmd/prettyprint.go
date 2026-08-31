@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"orbx/internal/encodingutil"
+	"github.com/mmilanovic4/orbx/internal/encodingutil"
 	"strings"
 
 	"github.com/spf13/cobra"

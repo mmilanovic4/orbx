@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"orbx/internal/sysutil"
+	"github.com/mmilanovic4/orbx/internal/sysutil"
 	"os"
 	"os/exec"
 	"strconv"

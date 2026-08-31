@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"orbx/internal/netutil"
+	"github.com/mmilanovic4/orbx/internal/netutil"
 	"time"
 
 	"github.com/spf13/cobra"

@@ -1,4 +1,4 @@
-module orbx
+module github.com/mmilanovic4/orbx
 
 go 1.26.2
 

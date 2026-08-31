@@ -6,7 +6,7 @@ import (
 	"strings"
 	"unicode"
 
-	"orbx/internal/encodingutil"
+	"github.com/mmilanovic4/orbx/internal/encodingutil"
 
 	"github.com/spf13/cobra"
 )

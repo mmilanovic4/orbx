@@ -5,8 +5,8 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"orbx/internal/encodingutil"
-	"orbx/internal/sysutil"
+	"github.com/mmilanovic4/orbx/internal/encodingutil"
+	"github.com/mmilanovic4/orbx/internal/sysutil"
 	"os"
 
 	"github.com/spf13/cobra"

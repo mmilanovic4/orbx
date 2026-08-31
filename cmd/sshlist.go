@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"orbx/internal/sysutil"
+	"github.com/mmilanovic4/orbx/internal/sysutil"
 	"os"
 	"path/filepath"
 	"strings"

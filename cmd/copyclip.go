@@ -3,7 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"orbx/internal/encodingutil"
+	"github.com/mmilanovic4/orbx/internal/encodingutil"
 	"os/exec"
 	"runtime"
 

@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"net/http"
-	"orbx/internal/netutil"
+	"github.com/mmilanovic4/orbx/internal/netutil"
 	"os"
 	"strconv"
 

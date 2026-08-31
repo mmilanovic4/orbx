@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"orbx/internal/formatutil"
+	"github.com/mmilanovic4/orbx/internal/formatutil"
 	"os"
 	"path/filepath"
 

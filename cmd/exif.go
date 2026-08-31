@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"orbx/internal/imageutil"
-	"orbx/internal/sysutil"
+	"github.com/mmilanovic4/orbx/internal/imageutil"
+	"github.com/mmilanovic4/orbx/internal/sysutil"
 
 	"github.com/spf13/cobra"
 )
