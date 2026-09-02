@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mmilanovic4/orbx/internal/sysutil"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mmilanovic4/orbx/internal/sysutil"
 
 	"github.com/spf13/cobra"
 )

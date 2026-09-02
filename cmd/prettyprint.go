@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"github.com/mmilanovic4/orbx/internal/encodingutil"
 	"strings"
+
+	"github.com/mmilanovic4/orbx/internal/encodingutil"
 
 	"github.com/spf13/cobra"
 )

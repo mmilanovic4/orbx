@@ -3,9 +3,10 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/mmilanovic4/orbx/internal/encodingutil"
 	"os/exec"
 	"runtime"
+
+	"github.com/mmilanovic4/orbx/internal/encodingutil"
 
 	"github.com/spf13/cobra"
 )

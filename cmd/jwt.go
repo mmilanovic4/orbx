@@ -3,8 +3,9 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mmilanovic4/orbx/internal/encodingutil"
 	"strings"
+
+	"github.com/mmilanovic4/orbx/internal/encodingutil"
 
 	"github.com/spf13/cobra"
 )

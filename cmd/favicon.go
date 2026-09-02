@@ -7,9 +7,10 @@ import (
 	"image"
 	"image/png"
 	"io"
-	"github.com/mmilanovic4/orbx/internal/sysutil"
 	"os"
 	"path/filepath"
+
+	"github.com/mmilanovic4/orbx/internal/sysutil"
 
 	"golang.org/x/image/draw"
 

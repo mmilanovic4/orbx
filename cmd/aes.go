@@ -3,10 +3,11 @@ package cmd
 import (
 	"crypto/rand"
 	"fmt"
+	"strings"
+
 	"github.com/mmilanovic4/orbx/internal/cryptoutil"
 	"github.com/mmilanovic4/orbx/internal/encodingutil"
 	"github.com/mmilanovic4/orbx/internal/sysutil"
-	"strings"
 
 	"github.com/spf13/cobra"
 )

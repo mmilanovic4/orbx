@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mmilanovic4/orbx/internal/encodingutil"
 	"strings"
 	"unicode"
+
+	"github.com/mmilanovic4/orbx/internal/encodingutil"
 
 	"github.com/spf13/cobra"
 )

@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mmilanovic4/orbx/internal/formatutil"
 	"os"
 	"path/filepath"
+
+	"github.com/mmilanovic4/orbx/internal/formatutil"
 
 	"github.com/spf13/cobra"
 )

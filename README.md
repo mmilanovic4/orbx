@@ -43,6 +43,7 @@ Usage:
   hex         Encode or decode hex
   qr          Generate a QR code from text or URL
   random      Generate a cryptographically secure random string
+  scrub       Remove EXIF and other metadata from an image (lossless)
   size        Show logical size of a file or directory
   text        String utilities
   watch       Repeatedly run a command every N seconds
@@ -230,6 +231,35 @@ GPSLatitude:      44° 48' 45.00" N
 GPSLongitude:     20° 27' 40.32" E
 GPSAltitude:      117 m
 GPSCoordinates:   44.812500, 20.461200
+```
+
+## Scrub
+
+Removes EXIF, XMP, IPTC, comments and other metadata from an image. Nothing is re-encoded — the JPEG scan data and the PNG/WebP image chunks are copied byte for byte, so there is no quality loss. Supports JPEG, PNG and WebP.
+
+> **Note:** The ICC color profile is kept by default so colors keep rendering the same — pass `--strip-icc` to drop it as well. Orientation is an EXIF tag, so a photo that relied on it may appear rotated once the metadata is gone. TIFF is not supported, because there the metadata is the structure that points to the image data.
+
+```bash
+# Writes photo-clean.jpg next to the original
+orbx scrub photo.jpg
+
+# Custom output path
+orbx scrub photo.jpg --out clean.jpg
+
+# Overwrite an existing output file
+orbx scrub photo.jpg --out clean.jpg --force
+
+# Also remove the ICC color profile
+orbx scrub photo.jpg --strip-icc
+```
+
+Sample output:
+
+```
+✓ Removed EXIF (1.0 KB)
+✓ Removed XMP (3.0 KB)
+✓ Removed IPTC (126 B)
+Saved to photo-clean.jpg (293.8 KB → 289.6 KB)
 ```
 
 ## QR Code

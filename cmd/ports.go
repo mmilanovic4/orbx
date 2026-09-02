@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mmilanovic4/orbx/internal/netutil"
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/mmilanovic4/orbx/internal/netutil"
 
 	"github.com/spf13/cobra"
 )

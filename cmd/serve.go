@@ -3,9 +3,10 @@ package cmd
 import (
 	"fmt"
 	"net/http"
-	"github.com/mmilanovic4/orbx/internal/netutil"
 	"os"
 	"strconv"
+
+	"github.com/mmilanovic4/orbx/internal/netutil"
 
 	"github.com/spf13/cobra"
 )

@@ -4,10 +4,11 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/mmilanovic4/orbx/internal/sysutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/mmilanovic4/orbx/internal/sysutil"
 
 	"github.com/spf13/cobra"
 )

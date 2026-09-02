@@ -3,8 +3,9 @@ package encodingutil
 import (
 	"fmt"
 	"io"
-	"github.com/mmilanovic4/orbx/internal/sysutil"
 	"os"
+
+	"github.com/mmilanovic4/orbx/internal/sysutil"
 )
 
 func GetInputData(text string, file string) ([]byte, error) {

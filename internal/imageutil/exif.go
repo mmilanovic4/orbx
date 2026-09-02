@@ -102,15 +102,39 @@ func ReadEXIF(data []byte, all bool) ([]Tag, error) {
 	return tags, nil
 }
 
-func findEXIF(data []byte) ([]byte, error) {
+type format int
+
+const (
+	formatUnknown format = iota
+	formatJPEG
+	formatPNG
+	formatWebP
+	formatTIFF
+)
+
+func detect(data []byte) format {
 	switch {
 	case len(data) >= 4 && data[0] == 0xFF && data[1] == 0xD8:
-		return findEXIFInJPEG(data)
+		return formatJPEG
 	case len(data) >= 8 && bytes.HasPrefix(data, []byte("\x89PNG\r\n\x1a\n")):
-		return findEXIFInPNG(data)
+		return formatPNG
 	case len(data) >= 12 && bytes.HasPrefix(data, []byte("RIFF")) && string(data[8:12]) == "WEBP":
-		return findEXIFInWebP(data)
+		return formatWebP
 	case len(data) >= 4 && (bytes.HasPrefix(data, []byte("II\x2a\x00")) || bytes.HasPrefix(data, []byte("MM\x00\x2a"))):
+		return formatTIFF
+	}
+	return formatUnknown
+}
+
+func findEXIF(data []byte) ([]byte, error) {
+	switch detect(data) {
+	case formatJPEG:
+		return findEXIFInJPEG(data)
+	case formatPNG:
+		return findEXIFInPNG(data)
+	case formatWebP:
+		return findEXIFInWebP(data)
+	case formatTIFF:
 		return data, nil // bare TIFF (also covers most raw formats)
 	}
 	return nil, fmt.Errorf("unsupported file format (expected JPEG, TIFF, PNG or WebP)")

@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mmilanovic4/orbx/internal/encodingutil"
 	"path/filepath"
 	"strings"
+
+	"github.com/mmilanovic4/orbx/internal/encodingutil"
 
 	go_qr "github.com/piglig/go-qr"
 	"github.com/spf13/cobra"

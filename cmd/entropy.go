@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/mmilanovic4/orbx/internal/cryptoutil"
 	"github.com/mmilanovic4/orbx/internal/encodingutil"
-	"strings"
 
 	"github.com/spf13/cobra"
 )

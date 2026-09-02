@@ -32,7 +32,8 @@ size: build
 	du -sh $(BINARY)
 
 lint:
-	go fmt ./...
+	go run golang.org/x/tools/cmd/goimports@latest -local github.com/mmilanovic4/orbx -w cmd internal main.go
+	go vet ./...
 	go mod tidy
 
 clean:
