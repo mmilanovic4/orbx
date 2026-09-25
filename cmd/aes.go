@@ -94,7 +94,9 @@ var aesDecryptCmd = &cobra.Command{
 			return fmt.Errorf("decryption failed: %w", err)
 		}
 
-		fmt.Println(string(plainText))
+		if err := sysutil.WriteStdout(plainText); err != nil {
+			return fmt.Errorf("failed to write output: %w", err)
+		}
 
 		if outFile != "" {
 			if err := sysutil.WritePrivateFile(outFile, plainText); err != nil {

@@ -35,7 +35,9 @@ var downloadCmd = &cobra.Command{
 			return nil
 		}
 
-		fmt.Println(string(resp.Body))
+		if err := sysutil.WriteStdout(resp.Body); err != nil {
+			return fmt.Errorf("failed to write output: %w", err)
+		}
 		return nil
 	},
 }

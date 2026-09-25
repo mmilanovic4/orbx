@@ -47,8 +47,8 @@ var compressCmd = &cobra.Command{
 				if err := sysutil.WriteFile(compressOut, result); err != nil {
 					return fmt.Errorf("failed to write output file: %w", err)
 				}
-			} else {
-				fmt.Println(string(result))
+			} else if err := sysutil.WriteStdout(result); err != nil {
+				return fmt.Errorf("failed to write output: %w", err)
 			}
 		} else {
 			result, err = gzipCompress(data)
