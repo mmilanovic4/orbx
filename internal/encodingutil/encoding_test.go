@@ -94,10 +94,34 @@ func TestHexRoundTrip(t *testing.T) {
 	}
 }
 
+func TestDecodeHexWhitespace(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+	}{
+		{"trailing newline", "48656c6c6f\n"},
+		{"wrapped lines", "4865\r\n6c6c\n6f\n"},
+		{"spaced bytes", " 48 65 6c 6c 6f "},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			decoded, err := DecodeHex(tt.input)
+			if err != nil {
+				t.Fatalf("DecodeHex(%q) error = %v", tt.input, err)
+			}
+			if string(decoded) != "Hello" {
+				t.Errorf("got %q, want %q", decoded, "Hello")
+			}
+		})
+	}
+}
+
 func TestDecodeHexInvalid(t *testing.T) {
-	_, err := DecodeHex("zzzz")
-	if err == nil {
-		t.Error("expected error for invalid hex")
+	for _, input := range []string{"zzzz", "486"} {
+		if _, err := DecodeHex(input); err == nil {
+			t.Errorf("DecodeHex(%q) expected error, got nil", input)
+		}
 	}
 }
 
