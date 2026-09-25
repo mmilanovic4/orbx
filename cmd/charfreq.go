@@ -32,6 +32,9 @@ var charfreqCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to read input: %w", err)
 		}
+		if len(data) == 0 {
+			return fmt.Errorf("input is empty")
+		}
 
 		freq := make(map[rune]int)
 		total := 0
@@ -49,11 +52,16 @@ var charfreqCmd = &cobra.Command{
 		for r, count := range freq {
 			entries = append(entries, entry{r, count})
 		}
+		// ties are ordered by character, map iteration order is random
 		sort.Slice(entries, func(i, j int) bool {
-			return entries[i].count > entries[j].count
+			if entries[i].count != entries[j].count {
+				return entries[i].count > entries[j].count
+			}
+			return entries[i].char < entries[j].char
 		})
 
 		maxCount := entries[0].count
+		unique := len(entries)
 
 		if charfreqASCII {
 			fmt.Printf("%-8s %-8s %-8s %s\n", "ASCII", "Count", "%", "Bar")
@@ -85,7 +93,7 @@ var charfreqCmd = &cobra.Command{
 			fmt.Printf("%-8s %-8d %-8.2f %s\n", label, e.count, pct, bar)
 		}
 
-		fmt.Printf("\n%d unique characters, %d total\n", len(entries), total)
+		fmt.Printf("\n%d unique characters, %d total\n", unique, total)
 
 		return nil
 	},
