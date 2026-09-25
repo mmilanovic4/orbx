@@ -5,6 +5,8 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"net"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -16,14 +18,17 @@ var certFile string
 
 func formatCertInfo(cert *x509.Certificate) {
 	now := time.Now()
-	daysLeft := int(cert.NotAfter.Sub(now).Hours() / 24)
+	expires := cert.NotAfter.Format("2006-01-02")
 
-	expiryStr := fmt.Sprintf("%s (%d days left)", cert.NotAfter.Format("2006-01-02"), daysLeft)
-	if daysLeft < 30 {
-		expiryStr += " ⚠️"
-	}
-	if daysLeft < 0 {
-		expiryStr = fmt.Sprintf("%s (expired %d days ago) ❌", cert.NotAfter.Format("2006-01-02"), -daysLeft)
+	var expiryStr string
+	if now.After(cert.NotAfter) {
+		expiryStr = fmt.Sprintf("%s (expired %d days ago) ❌", expires, int(now.Sub(cert.NotAfter).Hours()/24))
+	} else {
+		daysLeft := int(cert.NotAfter.Sub(now).Hours() / 24)
+		expiryStr = fmt.Sprintf("%s (%d days left)", expires, daysLeft)
+		if daysLeft < 30 {
+			expiryStr += " ⚠️"
+		}
 	}
 
 	fmt.Printf("Subject:    %s\n", cert.Subject.CommonName)
@@ -34,6 +39,18 @@ func formatCertInfo(cert *x509.Certificate) {
 	if len(cert.DNSNames) > 0 {
 		fmt.Printf("SANs:       %s\n", strings.Join(cert.DNSNames, ", "))
 	}
+}
+
+// splitCertTarget accepts example.com, example.com:8443, [::1]:8443 or a
+// URL and returns the host and port to connect to (443 by default).
+func splitCertTarget(target string) (string, string) {
+	if u, err := url.Parse(target); err == nil && u.Host != "" {
+		target = u.Host
+	}
+	if host, port, err := net.SplitHostPort(target); err == nil {
+		return host, port
+	}
+	return strings.Trim(target, "[]"), "443"
 }
 
 var certCmd = &cobra.Command{
@@ -66,23 +83,39 @@ var certCmd = &cobra.Command{
 			return fmt.Errorf("domain or --file required")
 		}
 
-		domain := args[0]
-		host := domain + ":443"
+		target := args[0]
+		host, port := splitCertTarget(target)
 
-		conn, err := tls.Dial("tcp", host, &tls.Config{
-			InsecureSkipVerify: false,
+		// the handshake skips verification so that expired or self-signed
+		// certificates can still be shown, they are verified below instead
+		dialer := &net.Dialer{Timeout: 10 * time.Second}
+		conn, err := tls.DialWithDialer(dialer, "tcp", net.JoinHostPort(host, port), &tls.Config{
+			ServerName:         host,
+			InsecureSkipVerify: true,
 		})
 		if err != nil {
-			return fmt.Errorf("failed to connect to %s: %w", domain, err)
+			return fmt.Errorf("failed to connect to %s: %w", target, err)
 		}
 		defer conn.Close()
 
 		certs := conn.ConnectionState().PeerCertificates
 		if len(certs) == 0 {
-			return fmt.Errorf("no certificates found for %s", domain)
+			return fmt.Errorf("no certificates found for %s", target)
 		}
 
 		formatCertInfo(certs[0])
+
+		opts := x509.VerifyOptions{
+			DNSName:       host,
+			Intermediates: x509.NewCertPool(),
+		}
+		for _, c := range certs[1:] {
+			opts.Intermediates.AddCert(c)
+		}
+		if _, err := certs[0].Verify(opts); err != nil {
+			return fmt.Errorf("certificate is not valid: %w", err)
+		}
+
 		return nil
 	},
 }
