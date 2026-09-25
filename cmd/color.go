@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -70,7 +71,8 @@ func rgbToHex(c RGB) string {
 }
 
 func rgbaToHex(c RGBA) string {
-	a := uint8(c.A * 255)
+	// rounded, truncating turns 0.5 into 7f and breaks #rrggbb80 round trips
+	a := uint8(math.Round(c.A * 255))
 	return fmt.Sprintf("#%02x%02x%02x%02x", c.R, c.G, c.B, a)
 }
 
@@ -80,8 +82,8 @@ var colorCmd = &cobra.Command{
 	Long: `Convert between color formats.
 
 Usage:
-  orbx color #ff6600
-  orbx color #ff6600cc
+  orbx color ff6600
+  orbx color '#ff6600cc'
   orbx color rgb 255 102 0
   orbx color rgba 255 102 0 0.8`,
 	GroupID: "dev",
@@ -133,32 +135,28 @@ Usage:
 			fmt.Printf("RGBA rgba(%d, %d, %d, %.2f)\n", c.R, c.G, c.B, c.A)
 
 		default:
-			s := args[0]
-			if !strings.HasPrefix(s, "#") {
-				return fmt.Errorf("unknown format: use #RRGGBB, #RRGGBBAA, rgb, or rgba")
-			}
-			hex := strings.TrimPrefix(s, "#")
+			// the # is optional, unquoted it starts a comment in bash
+			hex := strings.TrimPrefix(args[0], "#")
 			switch len(hex) {
 			case 3:
 				hex = string([]byte{hex[0], hex[0], hex[1], hex[1], hex[2], hex[2]})
-				s = "#" + hex
 				fallthrough
 			case 6:
-				c, err := parseHex(s)
+				c, err := parseHex(hex)
 				if err != nil {
 					return err
 				}
 				fmt.Printf("HEX  %s\n", rgbToHex(c))
 				fmt.Printf("RGB  rgb(%d, %d, %d)\n", c.R, c.G, c.B)
 			case 8:
-				c, err := parseHexA(s)
+				c, err := parseHexA(hex)
 				if err != nil {
 					return err
 				}
 				fmt.Printf("HEX  %s\n", rgbaToHex(c))
 				fmt.Printf("RGBA rgba(%d, %d, %d, %.2f)\n", c.R, c.G, c.B, c.A)
 			default:
-				return fmt.Errorf("invalid hex color: expected #RGB, #RRGGBB or #RRGGBBAA")
+				return fmt.Errorf("unknown format %q: use RGB, RRGGBB or RRGGBBAA hex (# optional), rgb or rgba", args[0])
 			}
 		}
 
