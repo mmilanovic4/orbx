@@ -23,6 +23,9 @@ var downloadCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("download failed: %w", err)
 		}
+		if !resp.OK() {
+			return fmt.Errorf("download failed: server responded with %s", resp.Status)
+		}
 
 		if downloadFile != "" {
 			if err := sysutil.WriteFile(downloadFile, resp.Body); err != nil {
