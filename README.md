@@ -235,7 +235,7 @@ GPSCoordinates:   44.812500, 20.461200
 
 ## Scrub
 
-Removes EXIF, XMP, IPTC, comments and other metadata from an image. Nothing is re-encoded — the JPEG scan data and the PNG/WebP image chunks are copied byte for byte, so there is no quality loss. Supports JPEG, PNG and WebP.
+Removes EXIF, XMP, IPTC, comments and other metadata from an image, as well as anything appended after the image itself (HDR gain maps, Motion Photo videos, vendor trailers), which can carry metadata of its own. Nothing is re-encoded — the JPEG scan data and the PNG/WebP image chunks are copied byte for byte, so there is no quality loss. Supports JPEG, PNG and WebP.
 
 > **Note:** The ICC color profile is kept by default so colors keep rendering the same — pass `--strip-icc` to drop it as well. Orientation is an EXIF tag, so a photo that relied on it may appear rotated once the metadata is gone. TIFF is not supported, because there the metadata is the structure that points to the image data.
 

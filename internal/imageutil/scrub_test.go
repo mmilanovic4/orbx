@@ -221,6 +221,85 @@ func TestScrubWebP(t *testing.T) {
 	}
 }
 
+func concat(parts ...[]byte) []byte {
+	var out []byte
+	for _, p := range parts {
+		out = append(out, p...)
+	}
+	return out
+}
+
+// an image appended after the main one, with EXIF of its own
+var appendedJPEG = concat([]byte{0xFF, 0xD8}, jpegSeg(0xE1, []byte("Exif\x00\x00GPS")), []byte{0xFF, 0xD9})
+
+func TestScrubJPEGImageEnd(t *testing.T) {
+	// a stuffed 0xFF byte and a restart marker in the first scan, then a DHT
+	// and a second scan as in progressive files
+	scans := concat(
+		[]byte{0xFF, 0xDA, 0x00, 0x02, 0x12, 0xFF, 0x00, 0x34, 0xFF, 0xD0, 0x56},
+		jpegSeg(0xC4, []byte{1, 2, 3}),
+		[]byte{0xFF, 0xDA, 0x00, 0x02, 0x78},
+	)
+	image := concat([]byte{0xFF, 0xD8}, scans, []byte{0xFF, 0xFF, 0xD9}) // fill byte before EOI
+	noEOI := concat([]byte{0xFF, 0xD8}, scans)
+
+	tests := []struct {
+		name string
+		data []byte
+		want []byte
+	}{
+		{"no trailing data", image, image},
+		{"appended image", concat(image, appendedJPEG), image},
+		{"appended video", concat(image, []byte("\x00\x00\x00\x18ftypmp42")), image},
+		{"appended image without EOI before it", concat(noEOI, appendedJPEG), noEOI},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cleaned, removed, err := Scrub(tt.data, false)
+			if err != nil {
+				t.Fatalf("Scrub() error = %v", err)
+			}
+			if !bytes.Equal(cleaned, tt.want) {
+				t.Errorf("Scrub() = % X, want % X", cleaned, tt.want)
+			}
+
+			trailing := len(tt.data) - len(tt.want)
+			switch {
+			case trailing == 0 && len(removed) != 0:
+				t.Errorf("removed = %v, want none", removed)
+			case trailing > 0 && (len(removed) != 1 || removed[0] != Removed{Name: "Trailing data", Bytes: trailing}):
+				t.Errorf("removed = %v, want trailing data of %d bytes", removed, trailing)
+			}
+		})
+	}
+}
+
+func TestScrubTrailingData(t *testing.T) {
+	tests := []struct {
+		name  string
+		image []byte
+	}{
+		{"png", buildPNG()},
+		{"webp", buildWebP(0)},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cleaned, removed, err := Scrub(concat(tt.image, appendedJPEG), false)
+			if err != nil {
+				t.Fatalf("Scrub() error = %v", err)
+			}
+			if !bytes.Equal(cleaned, tt.image) {
+				t.Error("output is not the image without the appended data")
+			}
+			if len(removed) != 1 || removed[0] != (Removed{Name: "Trailing data", Bytes: len(appendedJPEG)}) {
+				t.Errorf("removed = %v, want trailing data of %d bytes", removed, len(appendedJPEG))
+			}
+		})
+	}
+}
+
 func TestScrubNothingToRemove(t *testing.T) {
 	_, removed, err := Scrub(buildJPEG(jpegSeg(0xE0, []byte("JFIF\x00\x01\x02"))), false)
 	if err != nil {
