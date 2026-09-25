@@ -27,7 +27,7 @@ var textCmd = &cobra.Command{
 		case "lower":
 			fmt.Println(strings.ToLower(input))
 		case "title":
-			fmt.Println(strings.ToTitle(input))
+			fmt.Println(titleCase(input))
 		case "trim":
 			fmt.Println(strings.TrimSpace(input))
 		case "reverse":
@@ -55,6 +55,9 @@ var textCmd = &cobra.Command{
 		case "words":
 			fmt.Println(len(strings.Fields(input)))
 		case "contains":
+			if !cmd.Flags().Changed("substring") {
+				return fmt.Errorf("contains requires --substring (-s)")
+			}
 			fmt.Println(strings.Contains(input, substring))
 		default:
 			return fmt.Errorf("unknown operation %q — use: upper, lower, title, trim, reverse, slug, count, words, contains [-s substring]", op)
@@ -62,6 +65,30 @@ var textCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+// titleCase upper-cases the first letter of every whitespace-separated word
+// and lower-cases the rest, e.g. "hello WORLD" becomes "Hello World".
+// strings.ToTitle is not an option: it maps every letter to title case.
+func titleCase(s string) string {
+	var b strings.Builder
+	b.Grow(len(s))
+
+	wordStart := true
+	for _, r := range s {
+		switch {
+		case unicode.IsSpace(r):
+			wordStart = true
+		case wordStart:
+			r = unicode.ToTitle(r)
+			wordStart = false
+		default:
+			r = unicode.ToLower(r)
+		}
+		b.WriteRune(r)
+	}
+
+	return b.String()
 }
 
 func init() {
