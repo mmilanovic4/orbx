@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/mmilanovic4/orbx/internal/encodingutil"
+	"github.com/mmilanovic4/orbx/internal/formatutil"
 
 	"github.com/spf13/cobra"
 )
@@ -42,30 +42,12 @@ var jwtCmd = &cobra.Command{
 }
 
 func decodeJWTPart(part string) (string, error) {
-	// JWT uses base64url (no padding), add padding if needed
-	switch len(part) % 4 {
-	case 2:
-		part += "=="
-	case 3:
-		part += "="
-	}
-
-	data, err := encodingutil.DecodeBase64(part)
+	data, err := encodingutil.DecodeBase64URL(part)
 	if err != nil {
 		return "", err
 	}
 
-	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		return "", err
-	}
-
-	pretty, err := json.MarshalIndent(obj, "", "  ")
-	if err != nil {
-		return "", err
-	}
-
-	return string(pretty), nil
+	return formatutil.IndentJSON(data)
 }
 
 func init() {
