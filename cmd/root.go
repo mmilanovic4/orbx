@@ -15,6 +15,11 @@ var rootCmd = &cobra.Command{
 	Short:   "System utility CLI",
 	Long:    "orbx is a lightweight CLI utility for quick system tasks.",
 	Version: VERSION,
+	// Runs after flag and argument validation, so usage is still shown for
+	// usage mistakes but not for errors that happen while a command runs.
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		cmd.SilenceUsage = true
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
