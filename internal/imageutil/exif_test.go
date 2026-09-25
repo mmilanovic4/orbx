@@ -208,6 +208,53 @@ func TestReadEXIF(t *testing.T) {
 	}
 }
 
+func TestFormatSeconds(t *testing.T) {
+	tests := []struct {
+		input    float64
+		expected string
+	}{
+		{0.004, "1/250 s"},
+		{0.25, "1/4 s"},
+		{0.6, "0.6 s"},
+		{1.3, "1.3 s"},
+		{30, "30 s"},
+		{0, ""},
+	}
+
+	for _, tt := range tests {
+		if got := formatSeconds(tt.input); got != tt.expected {
+			t.Errorf("formatSeconds(%v) = %q, want %q", tt.input, got, tt.expected)
+		}
+	}
+}
+
+func TestReadEXIFFractionalGPS(t *testing.T) {
+	bo := binary.BigEndian
+	ifd0 := []testEntry{withTag(0x010F, ascii("Canon"))}
+	gps := []testEntry{
+		withTag(0x0001, ascii("N")),
+		withTag(0x0002, rational(bo, [2]uint32{44, 1}, [2]uint32{4875, 100}, [2]uint32{0, 1})),
+		withTag(0x0003, ascii("E")),
+		withTag(0x0004, rational(bo, [2]uint32{204612, 10000}, [2]uint32{0, 1}, [2]uint32{0, 1})),
+	}
+
+	tags, err := ReadEXIF(wrapJPEG(buildTIFF(bo, ifd0, nil, gps)), false)
+	if err != nil {
+		t.Fatalf("ReadEXIF() error = %v", err)
+	}
+
+	expected := map[string]string{
+		"GPSLatitude":    `44° 48' 45.00" N`,
+		"GPSLongitude":   `20° 27' 40.32" E`,
+		"GPSCoordinates": "44.812500, 20.461200",
+	}
+	for tag, want := range expected {
+		if got, _ := lookup(tags, tag); got != want {
+			t.Errorf("%s = %q, want %q", tag, got, want)
+		}
+	}
+}
+
 func TestReadEXIFUnknownTags(t *testing.T) {
 	data := wrapJPEG(sampleTIFF(binary.LittleEndian))
 
