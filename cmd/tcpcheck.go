@@ -15,6 +15,9 @@ var tcpcheckCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		target := args[0]
+		if _, port, err := net.SplitHostPort(target); err != nil || port == "" {
+			return fmt.Errorf("invalid target %q: expected host:port, e.g. example.com:443 or [::1]:22", target)
+		}
 
 		start := time.Now()
 		conn, err := net.DialTimeout("tcp", target, 2*time.Second)
@@ -22,7 +25,8 @@ var tcpcheckCmd = &cobra.Command{
 
 		if err != nil {
 			fmt.Printf("🔴 %s (%s)\n", target, latency)
-			return nil
+			// a non-zero exit code lets scripts use it: orbx tcpcheck db:5432 && ...
+			return fmt.Errorf("connection failed: %w", err)
 		}
 		defer conn.Close()
 
