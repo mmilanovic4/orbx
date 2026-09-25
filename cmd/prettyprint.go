@@ -1,12 +1,11 @@
 package cmd
 
 import (
-	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"strings"
 
 	"github.com/mmilanovic4/orbx/internal/encodingutil"
+	"github.com/mmilanovic4/orbx/internal/formatutil"
 
 	"github.com/spf13/cobra"
 )
@@ -35,34 +34,20 @@ var prettyCmd = &cobra.Command{
 		trimmed := strings.TrimSpace(string(data))
 
 		if strings.HasPrefix(trimmed, "{") || strings.HasPrefix(trimmed, "[") {
-			var obj any
-			if err := json.Unmarshal(data, &obj); err != nil {
+			pretty, err := formatutil.IndentJSON(data)
+			if err != nil {
 				return fmt.Errorf("invalid JSON: %w", err)
 			}
-			pretty, err := json.MarshalIndent(obj, "", "  ")
-			if err != nil {
-				return err
-			}
-			fmt.Println(string(pretty))
+			fmt.Println(pretty)
 			return nil
 		}
 
 		if strings.HasPrefix(trimmed, "<") {
-			var buf strings.Builder
-			decoder := xml.NewDecoder(strings.NewReader(trimmed))
-			encoder := xml.NewEncoder(&buf)
-			encoder.Indent("", "  ")
-			for {
-				token, err := decoder.Token()
-				if err != nil {
-					break
-				}
-				if err := encoder.EncodeToken(token); err != nil {
-					return fmt.Errorf("invalid XML: %w", err)
-				}
+			pretty, err := formatutil.IndentXML(data)
+			if err != nil {
+				return fmt.Errorf("invalid XML: %w", err)
 			}
-			encoder.Flush()
-			fmt.Println(buf.String())
+			fmt.Println(pretty)
 			return nil
 		}
 
