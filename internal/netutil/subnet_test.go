@@ -99,6 +99,25 @@ func TestParseSubnetIPv6(t *testing.T) {
 	}
 }
 
+func TestParseSubnetIPv4Mapped(t *testing.T) {
+	info, err := ParseSubnet("::ffff:192.168.1.10/120", "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if info.IsIPv6 {
+		t.Errorf("IsIPv6 = true, want false")
+	}
+	if info.Network != "192.168.1.0/24" {
+		t.Errorf("Network = %q, want %q", info.Network, "192.168.1.0/24")
+	}
+	if info.Broadcast != "192.168.1.255" {
+		t.Errorf("Broadcast = %q, want %q", info.Broadcast, "192.168.1.255")
+	}
+	if info.UsableHosts != "254" {
+		t.Errorf("UsableHosts = %q, want %q", info.UsableHosts, "254")
+	}
+}
+
 func TestParseSubnetErrors(t *testing.T) {
 	tests := []struct {
 		name string
@@ -110,6 +129,8 @@ func TestParseSubnetErrors(t *testing.T) {
 		{"invalid mask", "192.168.1.1", "not-a-mask"},
 		{"invalid hex mask", "192.168.1.1", "0xzzzzzzzz"},
 		{"mask with ipv6", "2001:db8::1", "255.255.255.0"},
+		{"non-contiguous mask", "192.168.1.10", "255.0.255.0"},
+		{"non-contiguous hex mask", "192.168.1.10", "0xff00ff00"},
 	}
 
 	for _, tt := range tests {

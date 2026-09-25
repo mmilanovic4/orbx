@@ -94,7 +94,14 @@ func (r *exifReader) formatDMS(e entry, refEntry entry) string {
 		ref = " " + r.str(refEntry)
 	}
 
-	return fmt.Sprintf(`%d° %d' %.2f"%s`, int(v[0]), int(v[1]), v[2], ref)
+	// many devices store fractional degrees or minutes (44°, 48.75', 0"),
+	// so the parts are recomputed from the total instead of truncated
+	total := math.Round((math.Abs(v[0])*3600+v[1]*60+v[2])*100) / 100
+	deg := math.Floor(total / 3600)
+	mins := math.Floor((total - deg*3600) / 60)
+	secs := total - deg*3600 - mins*60
+
+	return fmt.Sprintf(`%d° %d' %.2f"%s`, int(deg), int(mins), secs, ref)
 }
 
 func (r *exifReader) coordinate(byTag map[uint16]entry, tag, refTag uint16) (float64, bool) {

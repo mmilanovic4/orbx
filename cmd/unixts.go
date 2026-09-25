@@ -19,10 +19,14 @@ var unixtsCmd = &cobra.Command{
 	Use:     "unixts [to|from] [value]",
 	Short:   "Unix timestamp utilities",
 	GroupID: "dev",
-	Args:    cobra.NoArgs,
+	Args:    cobra.MaximumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
-			fmt.Println(time.Now().Unix())
+			if ms {
+				fmt.Println(time.Now().UnixMilli())
+			} else {
+				fmt.Println(time.Now().Unix())
+			}
 			return nil
 		}
 
@@ -44,8 +48,11 @@ var unixtsCmd = &cobra.Command{
 				return fmt.Errorf("invalid timezone %q: %w", tz, err)
 			}
 
-			t := time.Unix(ts, 0).In(loc)
-			fmt.Println(t.Format(dateutil.GetLayout(ms)))
+			t := time.Unix(ts, 0)
+			if ms {
+				t = time.UnixMilli(ts)
+			}
+			fmt.Println(t.In(loc).Format(dateutil.GetLayout(ms)))
 
 		case "from":
 			if len(args) < 2 {

@@ -44,7 +44,14 @@ func scrubJPEG(data []byte, stripICC bool) ([]byte, []Removed, error) {
 		}
 		// the scan data after SOS is copied untouched, which is what keeps this lossless
 		if marker == 0xDA || marker == 0xD9 {
-			return append(out, data[i:]...), removed, nil
+			end := i + 2
+			if marker == 0xDA {
+				end = jpegImageEnd(data, i)
+			}
+			if end < len(data) {
+				removed = append(removed, Removed{Name: "Trailing data", Bytes: len(data) - end})
+			}
+			return append(out, data[i:end]...), removed, nil
 		}
 
 		size := int(binary.BigEndian.Uint16(data[i+2 : i+4]))
@@ -63,6 +70,43 @@ func scrubJPEG(data []byte, stripICC bool) ([]byte, []Removed, error) {
 	}
 
 	return out, removed, nil
+}
+
+// jpegImageEnd returns the offset just past the EOI marker that ends the
+// image whose first scan starts at sos. What follows was appended to the
+// file (MPF images such as HDR gain maps, Motion Photo videos, vendor
+// trailers) and can carry metadata of its own.
+func jpegImageEnd(data []byte, sos int) int {
+	i := sos
+	for i+1 < len(data) {
+		if data[i] != 0xFF {
+			next := bytes.IndexByte(data[i:], 0xFF)
+			if next < 0 {
+				break
+			}
+			i += next
+			continue
+		}
+
+		switch marker := data[i+1]; {
+		case marker == 0xD9: // EOI
+			return i + 2
+		case marker == 0xD8: // SOI of an appended image, the EOI is missing
+			return i
+		case marker == 0xFF: // fill byte before a marker
+			i++
+		case marker == 0x00 || marker == 0x01 || (marker >= 0xD0 && marker <= 0xD7):
+			// stuffed 0xFF byte, TEM or restart marker within the scan data
+			i += 2
+		default:
+			// a segment between scans: DHT, DQT, DRI, the next SOS, ...
+			if i+4 > len(data) {
+				return len(data)
+			}
+			i += 2 + int(binary.BigEndian.Uint16(data[i+2:i+4]))
+		}
+	}
+	return len(data)
 }
 
 func jpegSegment(marker byte, payload []byte, stripICC bool) (string, bool) {
@@ -117,6 +161,15 @@ func scrubPNG(data []byte, stripICC bool) ([]byte, []Removed, error) {
 		}
 
 		i = end
+
+		// nothing after IEND is part of the image
+		if name == "IEND" {
+			break
+		}
+	}
+
+	if i < len(data) {
+		removed = append(removed, Removed{Name: "Trailing data", Bytes: len(data) - i})
 	}
 
 	return out, removed, nil
@@ -150,16 +203,24 @@ func scrubWebP(data []byte, stripICC bool) ([]byte, []Removed, error) {
 	var removed []Removed
 	var flags byte
 
+	// the RIFF header says where the image ends, anything after that was
+	// appended to the file
+	riffEnd := 8 + int(binary.LittleEndian.Uint32(data[4:8]))
+	if riffEnd < 12 {
+		return nil, nil, fmt.Errorf("malformed WebP header")
+	}
+	limit := min(riffEnd, len(data))
+
 	i := 12
-	for i+8 <= len(data) {
+	for i+8 <= limit {
 		name := string(data[i : i+4])
 		size := int(binary.LittleEndian.Uint32(data[i+4 : i+8]))
 		end := i + 8 + size + size%2
-		if size < 0 || i+8+size > len(data) {
+		if size < 0 || i+8+size > limit {
 			return nil, nil, fmt.Errorf("malformed WebP chunk at offset %d", i)
 		}
-		if end > len(data) {
-			end = len(data)
+		if end > limit {
+			end = limit
 		}
 
 		switch {
@@ -177,6 +238,10 @@ func scrubWebP(data []byte, stripICC bool) ([]byte, []Removed, error) {
 		}
 
 		i = end
+	}
+
+	if limit < len(data) {
+		removed = append(removed, Removed{Name: "Trailing data", Bytes: len(data) - limit})
 	}
 
 	// VP8X advertises which optional chunks follow, so its flags have to match

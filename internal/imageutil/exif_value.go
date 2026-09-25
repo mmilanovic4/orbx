@@ -138,7 +138,9 @@ func formatSeconds(v float64) string {
 	if v <= 0 {
 		return ""
 	}
-	if v < 1 {
+	// fractions only up to 1/4 s like ExifTool, above that 1/x would
+	// round 0.6 s down to 1/2 s
+	if v < 0.25001 {
 		return fmt.Sprintf("1/%d s", int(math.Round(1/v)))
 	}
 	return formatFloat(v) + " s"

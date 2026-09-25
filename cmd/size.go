@@ -10,18 +10,27 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func dirSize(path string) (int64, error) {
+func dirSize(root string) (int64, error) {
 	var size int64
-	err := filepath.WalkDir(path, func(_ string, d os.DirEntry, err error) error {
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
-			return err
+			if path == root {
+				return err
+			}
+			// one unreadable entry should not hide the size of everything else
+			fmt.Fprintf(os.Stderr, "warning: %s\n", err)
+			if d != nil && d.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
 		}
 		if d.IsDir() {
 			return nil
 		}
 		info, err := d.Info()
 		if err != nil {
-			return err
+			fmt.Fprintf(os.Stderr, "warning: %s\n", err)
+			return nil
 		}
 		size += info.Size()
 		return nil

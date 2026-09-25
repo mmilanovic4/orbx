@@ -71,20 +71,41 @@ func parseEnv(content string) []envEntry {
 		}
 
 		key = strings.TrimSpace(key)
-		value = strings.TrimSpace(value)
 
-		// Strip surrounding quotes
-		if len(value) >= 2 {
-			if (value[0] == '"' && value[len(value)-1] == '"') ||
-				(value[0] == '\'' && value[len(value)-1] == '\'') {
-				value = value[1 : len(value)-1]
-			}
-		}
-
-		entries = append(entries, envEntry{key: key, value: value})
+		entries = append(entries, envEntry{key: key, value: parseEnvValue(value)})
 	}
 
 	return entries
+}
+
+// parseEnvValue strips the quotes around a value, or the comment after an
+// unquoted one: in `A=1 # note` the value is 1, while in `A=a#b` the # is
+// part of the value.
+func parseEnvValue(value string) string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return value
+	}
+
+	if q := value[0]; q == '"' || q == '\'' {
+		for i := 1; i < len(value); i++ {
+			if q == '"' && value[i] == '\\' {
+				i++ // skip the escaped character
+				continue
+			}
+			if value[i] == q {
+				return value[1:i]
+			}
+		}
+		return value // no closing quote, show it as written
+	}
+
+	for i := 1; i < len(value); i++ {
+		if value[i] == '#' && (value[i-1] == ' ' || value[i-1] == '\t') {
+			return strings.TrimSpace(value[:i])
+		}
+	}
+	return value
 }
 
 func init() {

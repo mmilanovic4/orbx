@@ -48,14 +48,16 @@ var aesEncryptCmd = &cobra.Command{
 		}
 
 		cipherTextEncoded := encodingutil.EncodeBase64(cipherText)
-		fmt.Println(cipherTextEncoded)
 
 		if outFile != "" {
 			if err := sysutil.WriteFile(outFile, []byte(cipherTextEncoded)); err != nil {
 				return fmt.Errorf("failed to write output file: %w", err)
 			}
+			fmt.Printf("Saved to %s\n", outFile)
+			return nil
 		}
 
+		fmt.Println(cipherTextEncoded)
 		return nil
 	},
 }
@@ -94,14 +96,19 @@ var aesDecryptCmd = &cobra.Command{
 			return fmt.Errorf("decryption failed: %w", err)
 		}
 
-		fmt.Println(string(plainText))
-
+		// with --out the plaintext only goes to the file, never to the
+		// terminal, its scrollback or logs
 		if outFile != "" {
-			if err := sysutil.WriteFile(outFile, plainText); err != nil {
+			if err := sysutil.WritePrivateFile(outFile, plainText); err != nil {
 				return fmt.Errorf("failed to write output file: %w", err)
 			}
+			fmt.Printf("Saved to %s\n", outFile)
+			return nil
 		}
 
+		if err := sysutil.WriteStdout(plainText); err != nil {
+			return fmt.Errorf("failed to write output: %w", err)
+		}
 		return nil
 	},
 }
@@ -133,14 +140,18 @@ var aesKeyCmd = &cobra.Command{
 		}
 
 		keyEncoded := encodingutil.EncodeBase64(key)
-		fmt.Println(keyEncoded)
 
+		// with --out the key only goes to the file, never to the terminal,
+		// its scrollback or logs
 		if outFile != "" {
-			if err := sysutil.WriteFile(outFile, []byte(keyEncoded)); err != nil {
+			if err := sysutil.WritePrivateFile(outFile, []byte(keyEncoded)); err != nil {
 				return fmt.Errorf("failed to write output file: %w", err)
 			}
+			fmt.Printf("Saved to %s\n", outFile)
+			return nil
 		}
 
+		fmt.Println(keyEncoded)
 		return nil
 	},
 }
@@ -154,13 +165,13 @@ func init() {
 
 	aesEncryptCmd.Flags().String("key", "", "Path to key file (required)")
 	aesEncryptCmd.Flags().String("file", "", "Input file (optional)")
-	aesEncryptCmd.Flags().String("out", "", "Output file (optional)")
+	aesEncryptCmd.Flags().String("out", "", "Output file instead of stdout (optional)")
 	aesEncryptCmd.MarkFlagRequired("key")
 
 	aesDecryptCmd.Flags().String("key", "", "Path to key file (required)")
 	aesDecryptCmd.Flags().String("file", "", "Input file (optional)")
-	aesDecryptCmd.Flags().String("out", "", "Output file (optional)")
+	aesDecryptCmd.Flags().String("out", "", "Output file instead of stdout (optional)")
 	aesDecryptCmd.MarkFlagRequired("key")
 
-	aesKeyCmd.Flags().String("out", "", "Output file (optional)")
+	aesKeyCmd.Flags().String("out", "", "Output file instead of stdout (optional)")
 }

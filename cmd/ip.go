@@ -16,9 +16,12 @@ var ipCmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		resp, err := netutil.Get("https://api.ipify.org")
-		if err != nil {
+		switch {
+		case err != nil:
 			fmt.Println("Failed to get public IP:", err)
-		} else {
+		case !resp.OK():
+			fmt.Println("Failed to get public IP: server responded with", resp.Status)
+		default:
 			fmt.Println("Public IP:", string(resp.Body))
 		}
 

@@ -7,9 +7,15 @@ import (
 )
 
 type HTTPResult struct {
-	Status  string
-	Headers http.Header
-	Body    []byte
+	Status     string
+	StatusCode int
+	Headers    http.Header
+	Body       []byte
+}
+
+// OK reports whether the server answered with a 2xx status.
+func (r *HTTPResult) OK() bool {
+	return r.StatusCode >= 200 && r.StatusCode < 300
 }
 
 type GetOptions struct {
@@ -64,5 +70,5 @@ func Get(url string, opts ...Option) (*HTTPResult, error) {
 		return nil, err
 	}
 
-	return &HTTPResult{Status: resp.Status, Headers: resp.Header, Body: body}, nil
+	return &HTTPResult{Status: resp.Status, StatusCode: resp.StatusCode, Headers: resp.Header, Body: body}, nil
 }

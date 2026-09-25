@@ -27,12 +27,17 @@ var countdownCmd = &cobra.Command{
 				return nil
 			}
 
-			h := int(remaining.Hours())
-			m := int(remaining.Minutes()) % 60
-			s := int(remaining.Seconds()) % 60
+			// round up, so 3s starts at 00:00:03 and 00:00:00 is never shown
+			secs := int((remaining + time.Second - 1) / time.Second)
+			h := secs / 3600
+			m := secs / 60 % 60
+			s := secs % 60
 
 			fmt.Printf("\r%02d:%02d:%02d", h, m, s)
-			time.Sleep(time.Second)
+
+			// sleep until the shown value changes rather than a fixed second,
+			// which would slowly drift and skip values
+			time.Sleep(remaining - time.Duration(secs-1)*time.Second)
 		}
 	},
 }

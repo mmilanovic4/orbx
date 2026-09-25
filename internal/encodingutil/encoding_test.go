@@ -37,6 +37,39 @@ func TestDecodeBase64Invalid(t *testing.T) {
 	}
 }
 
+func TestDecodeBase64URL(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"url alphabet", "PD4_fn5-", "<>?~~~"},
+		{"standard alphabet", "PD4/fn5+", "<>?~~~"},
+		{"without padding", "SGk", "Hi"},
+		{"with padding", "SGk=", "Hi"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			decoded, err := DecodeBase64URL(tt.input)
+			if err != nil {
+				t.Fatalf("DecodeBase64URL(%q) error = %v", tt.input, err)
+			}
+			if string(decoded) != tt.expected {
+				t.Errorf("got %q, want %q", decoded, tt.expected)
+			}
+		})
+	}
+}
+
+func TestDecodeBase64URLInvalid(t *testing.T) {
+	for _, input := range []string{"a", "not valid!"} {
+		if _, err := DecodeBase64URL(input); err == nil {
+			t.Errorf("DecodeBase64URL(%q) expected error, got nil", input)
+		}
+	}
+}
+
 func TestHexRoundTrip(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -61,10 +94,34 @@ func TestHexRoundTrip(t *testing.T) {
 	}
 }
 
+func TestDecodeHexWhitespace(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+	}{
+		{"trailing newline", "48656c6c6f\n"},
+		{"wrapped lines", "4865\r\n6c6c\n6f\n"},
+		{"spaced bytes", " 48 65 6c 6c 6f "},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			decoded, err := DecodeHex(tt.input)
+			if err != nil {
+				t.Fatalf("DecodeHex(%q) error = %v", tt.input, err)
+			}
+			if string(decoded) != "Hello" {
+				t.Errorf("got %q, want %q", decoded, "Hello")
+			}
+		})
+	}
+}
+
 func TestDecodeHexInvalid(t *testing.T) {
-	_, err := DecodeHex("zzzz")
-	if err == nil {
-		t.Error("expected error for invalid hex")
+	for _, input := range []string{"zzzz", "486"} {
+		if _, err := DecodeHex(input); err == nil {
+			t.Errorf("DecodeHex(%q) expected error, got nil", input)
+		}
 	}
 }
 

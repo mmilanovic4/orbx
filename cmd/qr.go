@@ -116,7 +116,7 @@ func saveQRToFile(qr *go_qr.QrCode, path string) error {
 
 func init() {
 	qrCmd.Flags().StringVarP(&qrFile, "file", "f", "", "read input from file")
-	qrCmd.Flags().StringVarP(&qrLevel, "level", "l", "medium", "error correction level (1, 2, 3, 4)")
+	qrCmd.Flags().StringVarP(&qrLevel, "level", "l", "2", "error correction level (1, 2, 3, 4)")
 	qrCmd.Flags().StringVarP(&qrOut, "out", "o", "", "save to file (.png or .svg)")
 	rootCmd.AddCommand(qrCmd)
 }

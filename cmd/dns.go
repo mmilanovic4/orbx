@@ -1,12 +1,16 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"net"
+	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
 )
+
+var dnsRecordTypes = []string{"A", "AAAA", "MX", "CNAME", "TXT"}
 
 var dnsCmd = &cobra.Command{
 	Use:   "dns [domain] [type]",
@@ -14,7 +18,7 @@ var dnsCmd = &cobra.Command{
 	Long: `Resolve DNS records for a domain.
 
 Supported record types:
-  A / AAAA  (default)
+  A, AAAA  (both by default)
   MX
   CNAME
   TXT`,
@@ -26,6 +30,9 @@ Supported record types:
 
 		if len(args) > 1 {
 			recordType = strings.TrimSpace(strings.ToUpper(args[1]))
+			if !slices.Contains(dnsRecordTypes, recordType) {
+				return fmt.Errorf("unsupported record type %q: use %s", args[1], strings.Join(dnsRecordTypes, ", "))
+			}
 		}
 
 		fmt.Println("Resolving:", domain)
@@ -57,11 +64,20 @@ Supported record types:
 				fmt.Println(" ", t)
 			}
 		default:
-			ips, err := net.LookupIP(domain)
-			if err != nil {
-				return fmt.Errorf("failed to lookup A/AAAA records: %w", err)
+			// "ip" asks for both address families, "ip4" and "ip6" for one
+			network, label := "ip", "A / AAAA"
+			switch recordType {
+			case "A":
+				network, label = "ip4", "A"
+			case "AAAA":
+				network, label = "ip6", "AAAA"
 			}
-			fmt.Println("\nA / AAAA records:")
+
+			ips, err := net.DefaultResolver.LookupIP(context.Background(), network, domain)
+			if err != nil {
+				return fmt.Errorf("failed to lookup %s records: %w", label, err)
+			}
+			fmt.Printf("\n%s records:\n", label)
 			for _, ip := range ips {
 				fmt.Println(" ", ip)
 			}

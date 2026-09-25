@@ -19,9 +19,12 @@ var pingCmd = &cobra.Command{
 	GroupID: "network",
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var total time.Duration
-		var min time.Duration = time.Hour
-		var max time.Duration
+		if pingCount < 1 {
+			return fmt.Errorf("count must be at least 1")
+		}
+
+		var total, minLatency, maxLatency time.Duration
+		succeeded := 0
 
 		for i := 1; i <= pingCount; i++ {
 			start := time.Now()
@@ -36,21 +39,27 @@ var pingCmd = &cobra.Command{
 
 			fmt.Printf("%d: %s\n", i, latency)
 
+			if succeeded == 0 || latency < minLatency {
+				minLatency = latency
+			}
+			if latency > maxLatency {
+				maxLatency = latency
+			}
 			total += latency
-
-			if latency < min {
-				min = latency
-			}
-			if latency > max {
-				max = latency
-			}
+			succeeded++
 		}
 
-		avg := total / time.Duration(pingCount)
+		// failed requests have no latency, so they stay out of the stats
+		if succeeded == 0 {
+			return fmt.Errorf("all %d requests failed", pingCount)
+		}
 
-		fmt.Printf("\navg: %s\n", avg)
-		fmt.Printf("min: %s\n", min)
-		fmt.Printf("max: %s\n", max)
+		fmt.Printf("\navg: %s\n", total/time.Duration(succeeded))
+		fmt.Printf("min: %s\n", minLatency)
+		fmt.Printf("max: %s\n", maxLatency)
+		if failed := pingCount - succeeded; failed > 0 {
+			fmt.Printf("failed: %d/%d\n", failed, pingCount)
+		}
 
 		return nil
 	},

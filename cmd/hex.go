@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mmilanovic4/orbx/internal/encodingutil"
+	"github.com/mmilanovic4/orbx/internal/sysutil"
 
 	"github.com/spf13/cobra"
 )
@@ -38,7 +39,9 @@ var hexCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("invalid hex input: %w", err)
 			}
-			fmt.Println(string(decoded))
+			if err := sysutil.WriteStdout(decoded); err != nil {
+				return fmt.Errorf("failed to write output: %w", err)
+			}
 		default:
 			return fmt.Errorf("unknown mode %q: use encode or decode", mode)
 		}
