@@ -97,7 +97,7 @@ var aesDecryptCmd = &cobra.Command{
 		fmt.Println(string(plainText))
 
 		if outFile != "" {
-			if err := sysutil.WriteFile(outFile, plainText); err != nil {
+			if err := sysutil.WritePrivateFile(outFile, plainText); err != nil {
 				return fmt.Errorf("failed to write output file: %w", err)
 			}
 		}
@@ -136,7 +136,7 @@ var aesKeyCmd = &cobra.Command{
 		fmt.Println(keyEncoded)
 
 		if outFile != "" {
-			if err := sysutil.WriteFile(outFile, []byte(keyEncoded)); err != nil {
+			if err := sysutil.WritePrivateFile(outFile, []byte(keyEncoded)); err != nil {
 				return fmt.Errorf("failed to write output file: %w", err)
 			}
 		}
