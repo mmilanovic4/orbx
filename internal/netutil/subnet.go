@@ -55,6 +55,14 @@ func ParseSubnet(addr string, mask string) (*SubnetInfo, error) {
 	}
 
 	if ip4 := ip.To4(); ip4 != nil {
+		// an IPv4-mapped IPv6 CIDR (::ffff:192.168.1.1/120) comes with a
+		// 128-bit mask, of which only the last 32 bits cover the IPv4 part
+		if ones, bits := ipNet.Mask.Size(); bits == 8*net.IPv6len {
+			if ones < 96 {
+				return ipv6Subnet(ip, ipNet), nil
+			}
+			ipNet = &net.IPNet{IP: ipNet.IP.To4(), Mask: net.CIDRMask(ones-96, 8*net.IPv4len)}
+		}
 		return ipv4Subnet(ip4, ipNet), nil
 	}
 
@@ -118,20 +126,28 @@ func ipv6Subnet(ip net.IP, ipNet *net.IPNet) *SubnetInfo {
 }
 
 func parseIPv4Mask(mask string) (net.IPMask, error) {
+	var m net.IPMask
+
 	if rest, ok := strings.CutPrefix(strings.ToLower(mask), "0x"); ok {
 		n, err := strconv.ParseUint(rest, 16, 32)
 		if err != nil {
 			return nil, fmt.Errorf("invalid netmask: %s", mask)
 		}
-		return net.IPMask(uint32ToIP(uint32(n)).To4()), nil
+		m = net.IPMask(uint32ToIP(uint32(n)).To4())
+	} else {
+		maskIP := net.ParseIP(mask)
+		if maskIP == nil || maskIP.To4() == nil {
+			return nil, fmt.Errorf("invalid netmask: %s", mask)
+		}
+		m = net.IPMask(maskIP.To4())
 	}
 
-	maskIP := net.ParseIP(mask)
-	if maskIP == nil || maskIP.To4() == nil {
-		return nil, fmt.Errorf("invalid netmask: %s", mask)
+	// Size reports 0 bits for masks like 255.0.255.0, which have no prefix length
+	if _, bits := m.Size(); bits == 0 {
+		return nil, fmt.Errorf("invalid netmask %s: mask bits must be contiguous (e.g. 255.255.255.0)", mask)
 	}
 
-	return net.IPMask(maskIP.To4()), nil
+	return m, nil
 }
 
 func ipToUint32(ip net.IP) uint32 {
