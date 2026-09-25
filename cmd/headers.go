@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 	"time"
 
 	"github.com/mmilanovic4/orbx/internal/netutil"
@@ -27,9 +29,10 @@ var headersCmd = &cobra.Command{
 		fmt.Printf("Status: %s\n", resp.Status)
 		fmt.Printf("Time: %s\n", duration)
 
+		// sorted by name, map order would change on every run
 		fmt.Println("Headers:")
-		for key, values := range resp.Headers {
-			for _, value := range values {
+		for _, key := range slices.Sorted(maps.Keys(resp.Headers)) {
+			for _, value := range resp.Headers[key] {
 				fmt.Printf("  %s: %s\n", key, value)
 			}
 		}
