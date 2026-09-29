@@ -31,6 +31,11 @@ var ipCmd = &cobra.Command{
 			return fmt.Errorf("failed to get network interfaces: %w", err)
 		}
 
+		type row struct {
+			name, ip, mac string
+		}
+		var rows []row
+
 		for _, i := range interfaces {
 			addrs, err := i.Addrs()
 			if err != nil {
@@ -56,8 +61,18 @@ var ipCmd = &cobra.Command{
 					mac = "No MAC"
 				}
 
-				fmt.Printf(" - %-8s %-39s [%s]\n", "["+i.Name+"]", ip.String(), mac)
+				rows = append(rows, row{"[" + i.Name + "]", ip.String(), mac})
 			}
+		}
+
+		// interface names like [bridge100] overflowed a fixed column
+		nameWidth, ipWidth := 0, 0
+		for _, r := range rows {
+			nameWidth = max(nameWidth, len(r.name))
+			ipWidth = max(ipWidth, len(r.ip))
+		}
+		for _, r := range rows {
+			fmt.Printf(" - %-*s %-*s [%s]\n", nameWidth, r.name, ipWidth, r.ip, r.mac)
 		}
 
 		return nil
