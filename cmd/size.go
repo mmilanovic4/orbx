@@ -59,23 +59,19 @@ var sizeCmd = &cobra.Command{
 			args = []string{"."}
 		}
 
-		if len(args) == 1 {
-			size, err := pathSize(args[0])
-			if err != nil {
-				return err
-			}
-			abs, err := filepath.Abs(args[0])
-			if err != nil {
-				return fmt.Errorf("failed to resolve path: %w", err)
-			}
-			fmt.Printf("%s\t%s\n", formatutil.FormatLogicalSize(size), abs)
-			return nil
+		type row struct {
+			size  string
+			label string
 		}
+		var rows []row
 
 		var total int64
 		for _, target := range args {
 			size, err := pathSize(target)
 			if err != nil {
+				if len(args) == 1 {
+					return err
+				}
 				fmt.Fprintf(os.Stderr, "warning: %s\n", err)
 				continue
 			}
@@ -83,11 +79,22 @@ var sizeCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("failed to resolve path: %w", err)
 			}
-			fmt.Printf("%s\t%s\n", formatutil.FormatLogicalSize(size), abs)
+			rows = append(rows, row{formatutil.FormatLogicalSize(size), abs})
 			total += size
 		}
 
-		fmt.Printf("%s\ttotal\n", formatutil.FormatLogicalSize(total))
+		if len(args) > 1 {
+			rows = append(rows, row{formatutil.FormatLogicalSize(total), "total"})
+		}
+
+		// a tab misaligns once a size reaches the 8 column tab stop
+		width := 0
+		for _, r := range rows {
+			width = max(width, len(r.size))
+		}
+		for _, r := range rows {
+			fmt.Printf("%*s  %s\n", width, r.size, r.label)
+		}
 
 		return nil
 	},
