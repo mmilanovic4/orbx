@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/mmilanovic4/orbx/internal/netutil"
 	"github.com/mmilanovic4/orbx/internal/sysutil"
@@ -73,8 +74,10 @@ var sshlistCmd = &cobra.Command{
 			return nil
 		}
 
+		// right-align numbers so 9. and 10. line up
+		width := len(strconv.Itoa(len(hosts)))
 		for i, h := range hosts {
-			fmt.Printf("%d. %s\n", i+1, formatSSHHost(h))
+			fmt.Printf("%*d. %s\n", width, i+1, formatSSHHost(h))
 		}
 
 		return nil

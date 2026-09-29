@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/mmilanovic4/orbx/internal/sysutil"
@@ -66,8 +67,14 @@ var hostsCmd = &cobra.Command{
 			return nil
 		}
 
+		// right-align numbers so 9. and 10. line up, pad IPs so the arrows line up
+		width := len(strconv.Itoa(len(entries)))
+		ipWidth := 0
+		for _, e := range entries {
+			ipWidth = max(ipWidth, len(e.IP))
+		}
 		for i, e := range entries {
-			fmt.Printf("%d. %s → %s\n", i+1, e.IP, strings.Join(e.Domains, ", "))
+			fmt.Printf("%*d. %-*s → %s\n", width, i+1, ipWidth, e.IP, strings.Join(e.Domains, ", "))
 		}
 
 		return nil
