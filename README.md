@@ -120,20 +120,18 @@ orbx aes decrypt --key secret.key --file ciphertext.txt
 
 Calculates the Shannon entropy of an input, expressed in bits per byte.
 
-> **Note:** By default, `entropy` attempts to decode the input as base64 before calculating — consistent with the output format of the `aes encrypt` command. If your input is not base64-encoded, pass the `--raw` flag to skip decoding and calculate entropy on the raw input directly.
+> **Note:** The input is measured as raw bytes. Pass `--base64` to decode it first, e.g. for the output of `aes encrypt` — base64 itself only uses 64 symbols, so measured as text it can never get above 6 bits/byte. Decoding is not automatic because plenty of plain text (`password`, `test`, `1234`) is valid base64 too.
 
 ```bash
-# Direct input (base64)
-orbx entropy 'SGVsbG8='
+# Direct input
+orbx entropy 'Hello!'
 
-# Skip base64 decoding, treat input as raw bytes
-orbx entropy 'Hello!' --raw
-
-# From file
-orbx entropy --file ciphertext.txt
+# Decode base64 first, e.g. ciphertext from aes encrypt
+orbx entropy 'SGVsbG8=' --base64
+orbx entropy --file ciphertext.txt --base64
 
 # Good entropy
-head -c 10000 /dev/urandom | orbx base64 encode | orbx entropy
+head -c 10000 /dev/urandom | orbx entropy
 ```
 
 ### Interpreting the result
@@ -237,7 +235,7 @@ GPSCoordinates:   44.812500, 20.461200
 
 Removes EXIF, XMP, IPTC, comments and other metadata from an image, as well as anything appended after the image itself (HDR gain maps, Motion Photo videos, vendor trailers), which can carry metadata of its own. Nothing is re-encoded — the JPEG scan data and the PNG/WebP image chunks are copied byte for byte, so there is no quality loss. Supports JPEG, PNG and WebP.
 
-> **Note:** The ICC color profile is kept by default so colors keep rendering the same — pass `--strip-icc` to drop it as well. Orientation is an EXIF tag, so a photo that relied on it may appear rotated once the metadata is gone. TIFF is not supported, because there the metadata is the structure that points to the image data.
+> **Note:** The ICC color profile is kept by default so colors keep rendering the same — pass `--strip-icc` to drop it as well. The orientation is kept as well: when a photo is stored sideways and only the EXIF Orientation tag turns it upright (as with most phone photos taken in portrait), the EXIF block is replaced by a minimal one with that single tag, which says nothing about who took the photo or where. HDR gain maps are removed with the rest of the appended data, so an HDR photo shows as its regular (SDR) version. TIFF is not supported, because there the metadata is the structure that points to the image data, and neither are HEIC and AVIF — convert them to JPEG first.
 
 ```bash
 # Writes photo-clean.jpg next to the original
@@ -256,7 +254,7 @@ orbx scrub photo.jpg --strip-icc
 Sample output:
 
 ```
-✓ Removed EXIF (1.0 KB)
+✓ Removed EXIF except orientation (1.0 KB)
 ✓ Removed XMP (3.0 KB)
 ✓ Removed IPTC (126 B)
 Saved to photo-clean.jpg (293.8 KB → 289.6 KB)

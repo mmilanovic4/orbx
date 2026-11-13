@@ -60,20 +60,24 @@ var compressCmd = &cobra.Command{
 					if err := sysutil.WriteFile(compressOut, result); err != nil {
 						return fmt.Errorf("failed to write output file: %w", err)
 					}
-				} else {
-					os.Stdout.Write(result)
+				} else if _, err := os.Stdout.Write(result); err != nil {
+					return fmt.Errorf("failed to write output: %w", err)
 				}
 			} else {
 				encoded := encodingutil.EncodeBase64(result)
-				fmt.Println(encoded)
 				if compressOut != "" {
 					if err := sysutil.WriteFile(compressOut, []byte(encoded)); err != nil {
 						return fmt.Errorf("failed to write output file: %w", err)
 					}
+				} else {
+					fmt.Println(encoded)
 				}
 			}
 		}
 
+		if compressOut != "" {
+			fmt.Printf("Saved to %s\n", compressOut)
+		}
 		return nil
 	},
 }

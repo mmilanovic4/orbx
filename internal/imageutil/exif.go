@@ -110,6 +110,7 @@ const (
 	formatPNG
 	formatWebP
 	formatTIFF
+	formatHEIF // HEIC and AVIF, recognized only to name them in errors
 )
 
 func detect(data []byte) format {
@@ -122,8 +123,18 @@ func detect(data []byte) format {
 		return formatWebP
 	case len(data) >= 4 && (bytes.HasPrefix(data, []byte("II\x2a\x00")) || bytes.HasPrefix(data, []byte("MM\x00\x2a"))):
 		return formatTIFF
+	case len(data) >= 12 && string(data[4:8]) == "ftyp" && isHEIFBrand(string(data[8:12])):
+		return formatHEIF
 	}
 	return formatUnknown
+}
+
+func isHEIFBrand(brand string) bool {
+	switch brand {
+	case "heic", "heix", "heim", "heis", "hevc", "hevx", "mif1", "msf1", "avif", "avis":
+		return true
+	}
+	return false
 }
 
 func findEXIF(data []byte) ([]byte, error) {
@@ -136,6 +147,8 @@ func findEXIF(data []byte) ([]byte, error) {
 		return findEXIFInWebP(data)
 	case formatTIFF:
 		return data, nil // bare TIFF (also covers most raw formats)
+	case formatHEIF:
+		return nil, fmt.Errorf("HEIC and AVIF are not supported (expected JPEG, TIFF, PNG or WebP)")
 	}
 	return nil, fmt.Errorf("unsupported file format (expected JPEG, TIFF, PNG or WebP)")
 }
@@ -148,6 +161,11 @@ func findEXIFInJPEG(data []byte) ([]byte, error) {
 		}
 
 		marker := data[i+1]
+		// any marker may be preceded by 0xFF fill bytes
+		if marker == 0xFF {
+			i++
+			continue
+		}
 		// standalone markers carry no payload
 		if marker == 0x01 || (marker >= 0xD0 && marker <= 0xD8) {
 			i += 2

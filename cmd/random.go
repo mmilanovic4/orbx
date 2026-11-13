@@ -48,7 +48,7 @@ var randomCmd = &cobra.Command{
 		case "symbols":
 			charset = CHARSET_SYMBOLS
 		default:
-			charset = CHARSET_ALPHANUM
+			return fmt.Errorf("unknown charset %q: use alpha, alphanum, hex or symbols", randomCharset)
 		}
 
 		result := make([]byte, length)

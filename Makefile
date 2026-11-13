@@ -23,8 +23,10 @@ release: clean
 	GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o $(DIST)/$(BINARY)-darwin-arm64
 
 	GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o $(DIST)/$(BINARY)-linux-amd64
+	GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o $(DIST)/$(BINARY)-linux-arm64
 
 	GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o $(DIST)/$(BINARY)-windows-amd64.exe
+	GOOS=windows GOARCH=arm64 go build -ldflags="-s -w" -o $(DIST)/$(BINARY)-windows-arm64.exe
 
 	@echo "✅ Release build complete → $(DIST)/"
 
@@ -40,4 +42,4 @@ clean:
 	rm -rf $(BINARY) $(DIST)
 
 test:
-	go test ./internal/...
+	go test ./...

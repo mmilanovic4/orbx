@@ -11,6 +11,8 @@ func TestNormalizeURL(t *testing.T) {
 		{"https://example.com", "https://example.com"},
 		{"http://example.com", "http://example.com"},
 		{"http://example.com/path", "http://example.com/path"},
+		{"HTTP://example.com", "HTTP://example.com"},
+		{"Https://example.com", "Https://example.com"},
 	}
 
 	for _, tt := range tests {

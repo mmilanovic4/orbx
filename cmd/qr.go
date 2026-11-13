@@ -72,27 +72,34 @@ func parseQRLevel(level string) (go_qr.Ecc, error) {
 	}
 }
 
+// qrQuietZone is the empty margin around the code, in modules. The QR spec
+// asks for 4, with less some scanners do not find the code among the text
+// around it.
+const qrQuietZone = 4
+
+// renderQRTerminal draws two module rows per line with half blocks.
 func renderQRTerminal(qr *go_qr.QrCode) {
 	size := qr.Size()
-	for r := 0; r <= size+1; r += 2 {
-		for c := 0; c <= size+1; c++ {
-			x := c - 1
-			topY := r - 1
-			botY := r
-			topDark := x >= 0 && x < size && topY >= 0 && topY < size && qr.Module(x, topY)
-			botDark := x >= 0 && x < size && botY >= 0 && botY < size && qr.Module(x, botY)
+	dark := func(x, y int) bool {
+		return x >= 0 && x < size && y >= 0 && y < size && qr.Module(x, y)
+	}
+
+	for y := -qrQuietZone; y < size+qrQuietZone; y += 2 {
+		var line strings.Builder
+		for x := -qrQuietZone; x < size+qrQuietZone; x++ {
+			top, bottom := dark(x, y), dark(x, y+1)
 			switch {
-			case topDark && botDark:
-				fmt.Print("█")
-			case topDark:
-				fmt.Print("▀")
-			case botDark:
-				fmt.Print("▄")
+			case top && bottom:
+				line.WriteString("█")
+			case top:
+				line.WriteString("▀")
+			case bottom:
+				line.WriteString("▄")
 			default:
-				fmt.Print(" ")
+				line.WriteString(" ")
 			}
 		}
-		fmt.Println()
+		fmt.Println(line.String())
 	}
 }
 

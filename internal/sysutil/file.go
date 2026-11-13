@@ -1,7 +1,9 @@
 package sysutil
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 )
@@ -45,6 +47,48 @@ func WritePrivateFile(path string, data []byte) error {
 	}
 
 	if err := f.Close(); err != nil {
+		return fmt.Errorf("failed to save file: %w", err)
+	}
+	return nil
+}
+
+// ReplaceFile is WriteFile for outputs that may overwrite a file the user
+// cares about, even the input itself: the data goes to a temporary file in
+// the same directory that is then renamed over path, so an interrupted
+// write never leaves path half written.
+func ReplaceFile(path string, data []byte) error {
+	return ReplaceFileFrom(path, bytes.NewReader(data))
+}
+
+// ReplaceFileFrom is ReplaceFile for data that is streamed, such as a
+// download: it is copied from r without being held in memory.
+func ReplaceFileFrom(path string, r io.Reader) error {
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	f, err := os.CreateTemp(dir, "."+filepath.Base(path)+".tmp-*")
+	if err != nil {
+		return fmt.Errorf("failed to save file: %w", err)
+	}
+	tmp := f.Name()
+
+	err = f.Chmod(0644)
+	if err == nil {
+		_, err = io.Copy(f, r)
+	}
+	if err == nil {
+		err = f.Sync()
+	}
+	if closeErr := f.Close(); err == nil {
+		err = closeErr
+	}
+	if err == nil {
+		err = os.Rename(tmp, path)
+	}
+	if err != nil {
+		os.Remove(tmp)
 		return fmt.Errorf("failed to save file: %w", err)
 	}
 	return nil
