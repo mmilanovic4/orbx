@@ -3,6 +3,7 @@ package imageutil
 import (
 	"bytes"
 	"encoding/binary"
+	"hash/crc32"
 	"testing"
 )
 
@@ -114,7 +115,7 @@ func TestScrubJPEG(t *testing.T) {
 		t.Fatalf("Scrub() error = %v", err)
 	}
 
-	for _, want := range []string{"EXIF", "XMP", "IPTC", "Comment"} {
+	for _, want := range []string{exifOrientationKept, "XMP", "IPTC", "Comment"} {
 		if !contains(removedNames(removed), want) {
 			t.Errorf("%s was not removed", want)
 		}
@@ -132,15 +133,74 @@ func TestScrubJPEG(t *testing.T) {
 	if !bytes.Contains(cleaned, []byte("JFIF\x00")) {
 		t.Error("JFIF segment missing from output")
 	}
-	if bytes.Contains(cleaned, []byte("Exif\x00\x00")) {
-		t.Error("EXIF segment still present in output")
-	}
 
 	if got, want := jpegScan(t, cleaned), jpegScan(t, data); !bytes.Equal(got, want) {
 		t.Error("scan data changed, output is not lossless")
 	}
-	if _, err := ReadEXIF(cleaned, false); err == nil {
-		t.Error("EXIF still readable after scrub")
+	assertOnlyOrientation(t, cleaned)
+}
+
+// assertOnlyOrientation checks that of the sample EXIF block only the
+// orientation (Rotate 90 CW) is left.
+func assertOnlyOrientation(t *testing.T, cleaned []byte) {
+	t.Helper()
+
+	tags, err := ReadEXIF(cleaned, true)
+	if err != nil {
+		t.Fatalf("ReadEXIF() after scrub error = %v, want the orientation", err)
+	}
+	for _, tag := range tags {
+		switch tag.Name {
+		case "Orientation":
+			if tag.Value != "Rotate 90 CW" {
+				t.Errorf("Orientation after scrub = %q, want Rotate 90 CW", tag.Value)
+			}
+		case "YCbCrPositioning":
+			// required by the EXIF spec in JPEG files, carries no information
+		default:
+			t.Errorf("tag %s = %q left after scrub, want only the orientation", tag.Name, tag.Value)
+		}
+	}
+	if _, ok := lookup(tags, "Orientation"); !ok {
+		t.Error("Orientation missing after scrub")
+	}
+}
+
+func TestScrubJPEGWithoutOrientation(t *testing.T) {
+	// orientation 1 is the default, there is nothing worth keeping
+	tiff := buildTIFF(binary.BigEndian, []testEntry{withTag(0x0112, short(binary.BigEndian, 1))}, nil, nil)
+	data := buildJPEG(jpegSeg(0xE1, append([]byte("Exif\x00\x00"), tiff...)))
+
+	cleaned, removed, err := Scrub(data, false)
+	if err != nil {
+		t.Fatalf("Scrub() error = %v", err)
+	}
+	if !contains(removedNames(removed), "EXIF") {
+		t.Errorf("removed = %v, want EXIF", removedNames(removed))
+	}
+	if bytes.Contains(cleaned, []byte("Exif\x00\x00")) {
+		t.Error("EXIF segment still present in output")
+	}
+}
+
+func TestScrubJPEGFillBytes(t *testing.T) {
+	// 0xFF fill bytes may precede any marker
+	data := buildJPEG(
+		[]byte{0xFF, 0xFF},
+		jpegSeg(0xFE, []byte("a comment")),
+		[]byte{0xFF},
+		jpegSeg(0xE0, []byte("JFIF\x00\x01\x02")),
+	)
+
+	cleaned, removed, err := Scrub(data, false)
+	if err != nil {
+		t.Fatalf("Scrub() error = %v", err)
+	}
+	if !contains(removedNames(removed), "Comment") {
+		t.Errorf("removed = %v, want Comment", removedNames(removed))
+	}
+	if want := buildJPEG(jpegSeg(0xE0, []byte("JFIF\x00\x01\x02"))); !bytes.Equal(cleaned, want) {
+		t.Errorf("Scrub() = % X, want % X", cleaned, want)
 	}
 }
 
@@ -173,7 +233,7 @@ func TestScrubPNG(t *testing.T) {
 		t.Fatalf("Scrub() error = %v", err)
 	}
 
-	for _, want := range []string{"EXIF", "Text metadata", "XMP", "Timestamp"} {
+	for _, want := range []string{exifOrientationKept, "Text metadata", "XMP", "Timestamp"} {
 		if !contains(removedNames(removed), want) {
 			t.Errorf("%s was not removed", want)
 		}
@@ -184,10 +244,18 @@ func TestScrubPNG(t *testing.T) {
 			t.Errorf("chunk %s missing from output", chunk)
 		}
 	}
-	for _, chunk := range []string{"eXIf", "tEXt", "iTXt", "tIME"} {
+	for _, chunk := range []string{"tEXt", "iTXt", "tIME"} {
 		if bytes.Contains(cleaned, []byte(chunk)) {
 			t.Errorf("chunk %s still present in output", chunk)
 		}
+	}
+	assertOnlyOrientation(t, cleaned)
+
+	// the rewritten chunk needs a valid CRC, decoders reject it otherwise
+	i := bytes.Index(cleaned, []byte("eXIf"))
+	size := int(binary.BigEndian.Uint32(cleaned[i-4 : i]))
+	if got, want := binary.BigEndian.Uint32(cleaned[i+4+size:]), crc32.ChecksumIEEE(cleaned[i:i+4+size]); got != want {
+		t.Errorf("eXIf CRC = %08X, want %08X", got, want)
 	}
 }
 
@@ -204,7 +272,7 @@ func TestScrubWebP(t *testing.T) {
 		t.Fatalf("Scrub() error = %v", err)
 	}
 
-	if got, want := removedNames(removed), []string{"EXIF", "XMP"}; len(got) != len(want) {
+	if got, want := removedNames(removed), []string{exifOrientationKept, "XMP"}; len(got) != len(want) || got[0] != want[0] || got[1] != want[1] {
 		t.Fatalf("removed = %v, want %v", got, want)
 	}
 
@@ -213,9 +281,11 @@ func TestScrubWebP(t *testing.T) {
 		t.Errorf("RIFF size = %d, want %d", size, len(cleaned)-8)
 	}
 
-	if flags := cleaned[20]; flags != webpFlagICC {
-		t.Errorf("VP8X flags = 0x%02X, want 0x%02X", flags, webpFlagICC)
+	// the EXIF chunk now holds the orientation, so its flag stays set
+	if flags, want := cleaned[20], byte(webpFlagICC|webpFlagEXIF); flags != want {
+		t.Errorf("VP8X flags = 0x%02X, want 0x%02X", flags, want)
 	}
+	assertOnlyOrientation(t, cleaned)
 	if !bytes.Contains(cleaned, []byte("VP8 ")) || !bytes.Contains(cleaned, []byte("ICCP")) {
 		t.Error("image or ICC chunk missing from output")
 	}
@@ -316,6 +386,7 @@ func TestScrubErrors(t *testing.T) {
 		data []byte
 	}{
 		{"tiff", sampleTIFF(binary.BigEndian)},
+		{"heic", []byte("\x00\x00\x00\x18ftypheic\x00\x00\x00\x00mif1heic")},
 		{"not an image", []byte("module orbx")},
 		{"empty", nil},
 	}

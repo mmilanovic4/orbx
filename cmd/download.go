@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/mmilanovic4/orbx/internal/netutil"
 	"github.com/mmilanovic4/orbx/internal/sysutil"
@@ -19,24 +21,29 @@ var downloadCmd = &cobra.Command{
 	GroupID: "util",
 	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		resp, err := netutil.Get(args[0])
+		resp, err := netutil.Open(args[0])
 		if err != nil {
 			return fmt.Errorf("download failed: %w", err)
 		}
-		if !resp.OK() {
+		defer resp.Body.Close()
+
+		if resp.StatusCode < 200 || resp.StatusCode > 299 {
 			return fmt.Errorf("download failed: server responded with %s", resp.Status)
 		}
 
+		// the body is streamed, so files larger than the available memory
+		// download as well, and an interrupted download never replaces an
+		// existing file with a partial one
 		if downloadFile != "" {
-			if err := sysutil.WriteFile(downloadFile, resp.Body); err != nil {
-				return fmt.Errorf("failed to save file: %w", err)
+			if err := sysutil.ReplaceFileFrom(downloadFile, resp.Body); err != nil {
+				return fmt.Errorf("download failed: %w", err)
 			}
 			fmt.Printf("Saved to %s\n", downloadFile)
 			return nil
 		}
 
-		if err := sysutil.WriteStdout(resp.Body); err != nil {
-			return fmt.Errorf("failed to write output: %w", err)
+		if _, err := io.Copy(os.Stdout, resp.Body); err != nil {
+			return fmt.Errorf("download failed: %w", err)
 		}
 		return nil
 	},

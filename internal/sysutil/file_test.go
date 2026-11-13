@@ -54,3 +54,31 @@ func TestWritePrivateFile(t *testing.T) {
 		})
 	}
 }
+
+func TestReplaceFile(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "photo.jpg")
+	if err := os.WriteFile(path, []byte("original"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := ReplaceFile(path, []byte("cleaned")); err != nil {
+		t.Fatalf("ReplaceFile() error = %v", err)
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(data) != "cleaned" {
+		t.Errorf("content = %q, want %q", data, "cleaned")
+	}
+
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 {
+		t.Errorf("directory has %d entries, want only the output (temporary file left behind?)", len(entries))
+	}
+}

@@ -37,18 +37,19 @@ func WithHeaders(headers map[string]string) Option {
 	}
 }
 
+// DefaultTimeout bounds a request when no other timeout is given, so a
+// server that stops answering cannot hang the command forever.
+const DefaultTimeout = 30 * time.Second
+
 func Get(url string, opts ...Option) (*HTTPResult, error) {
 	url = NormalizeURL(url)
-	client := &http.Client{}
 
-	options := &GetOptions{}
+	options := &GetOptions{Timeout: DefaultTimeout}
 	for _, opt := range opts {
 		opt(options)
 	}
 
-	if options.Timeout > 0 {
-		client.Timeout = options.Timeout
-	}
+	client := &http.Client{Timeout: options.Timeout}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -71,4 +72,17 @@ func Get(url string, opts ...Option) (*HTTPResult, error) {
 	}
 
 	return &HTTPResult{Status: resp.Status, StatusCode: resp.StatusCode, Headers: resp.Header, Body: body}, nil
+}
+
+// Open sends a GET request and returns the response with its body unread,
+// for downloads that should be streamed rather than held in memory. The
+// caller closes the body. Connecting and waiting for the response headers
+// are time limited, reading the body is not: how long that takes depends
+// on the size of the file.
+func Open(url string) (*http.Response, error) {
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.ResponseHeaderTimeout = DefaultTimeout
+
+	client := &http.Client{Transport: transport}
+	return client.Get(NormalizeURL(url))
 }

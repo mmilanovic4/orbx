@@ -15,6 +15,9 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version: stable
+      # a tag is released only if the code it points to passes
+      - run: go vet ./...
+      - run: go test ./...
       - uses: goreleaser/goreleaser-action@v7
         with:
           version: "~> v2"

@@ -51,7 +51,7 @@ var scrubCmd = &cobra.Command{
 			}
 		}
 
-		if err := sysutil.WriteFile(out, cleaned); err != nil {
+		if err := sysutil.ReplaceFile(out, cleaned); err != nil {
 			return fmt.Errorf("failed to save file: %w", err)
 		}
 

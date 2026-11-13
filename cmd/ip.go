@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/mmilanovic4/orbx/internal/netutil"
 
@@ -15,7 +16,7 @@ var ipCmd = &cobra.Command{
 	GroupID: "network",
 	Args:    cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		resp, err := netutil.Get("https://api.ipify.org")
+		resp, err := netutil.Get("https://api.ipify.org", netutil.WithTimeout(5*time.Second))
 		switch {
 		case err != nil:
 			fmt.Println("Failed to get public IP:", err)
@@ -37,6 +38,11 @@ var ipCmd = &cobra.Command{
 		var rows []row
 
 		for _, i := range interfaces {
+			// loopback addresses are the same on every machine
+			if i.Flags&net.FlagLoopback != 0 {
+				continue
+			}
+
 			addrs, err := i.Addrs()
 			if err != nil {
 				continue
@@ -52,8 +58,8 @@ var ipCmd = &cobra.Command{
 					ip = v.IP
 				}
 
-				if ip.IsLoopback() {
-					// continue
+				if ip == nil || ip.IsLoopback() {
+					continue
 				}
 
 				mac := i.HardwareAddr.String()

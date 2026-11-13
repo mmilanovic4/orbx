@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"hash/crc32"
 )
 
 type Removed struct {
@@ -21,6 +22,8 @@ func Scrub(data []byte, stripICC bool) ([]byte, []Removed, error) {
 		return scrubWebP(data, stripICC)
 	case formatTIFF:
 		return nil, nil, fmt.Errorf("TIFF is not supported: its metadata is part of the image structure")
+	case formatHEIF:
+		return nil, nil, fmt.Errorf("HEIC and AVIF are not supported, convert the image to JPEG first")
 	}
 	return nil, nil, fmt.Errorf("unsupported file format (expected JPEG, PNG or WebP)")
 }
@@ -30,6 +33,7 @@ func scrubJPEG(data []byte, stripICC bool) ([]byte, []Removed, error) {
 	out = append(out, data[:2]...)
 
 	var removed []Removed
+	keptOrientation := false
 	i := 2
 	for i+4 <= len(data) {
 		if data[i] != 0xFF {
@@ -37,6 +41,11 @@ func scrubJPEG(data []byte, stripICC bool) ([]byte, []Removed, error) {
 		}
 
 		marker := data[i+1]
+		// any marker may be preceded by 0xFF fill bytes, they carry nothing
+		if marker == 0xFF {
+			i++
+			continue
+		}
 		if marker == 0x01 || (marker >= 0xD0 && marker <= 0xD8) {
 			out = append(out, data[i:i+2]...)
 			i += 2
@@ -60,7 +69,26 @@ func scrubJPEG(data []byte, stripICC bool) ([]byte, []Removed, error) {
 		}
 
 		segment := data[i : i+2+size]
-		if name, drop := jpegSegment(marker, segment[4:], stripICC); drop {
+		payload := segment[4:]
+		if marker == 0xE1 && bytes.HasPrefix(payload, []byte("Exif\x00\x00")) && !keptOrientation {
+			if o := exifOrientation(payload[6:]); o > 1 {
+				ycbcr := exifIFD0Short(payload[6:], tagYCbCrPositioning)
+				if ycbcr == 0 {
+					ycbcr = 1 // centered, the default
+				}
+				exif := append([]byte("Exif\x00\x00"), orientationEXIF(o, ycbcr)...)
+				kept := []byte{0xFF, 0xE1, 0, 0}
+				binary.BigEndian.PutUint16(kept[2:], uint16(len(exif)+2))
+				kept = append(kept, exif...)
+
+				out = append(out, kept...)
+				removed = append(removed, Removed{Name: exifOrientationKept, Bytes: len(segment) - len(kept)})
+				keptOrientation = true
+				i += 2 + size
+				continue
+			}
+		}
+		if name, drop := jpegSegment(marker, payload, stripICC); drop {
 			removed = append(removed, Removed{Name: name, Bytes: len(segment)})
 		} else {
 			out = append(out, segment...)
@@ -145,6 +173,7 @@ func scrubPNG(data []byte, stripICC bool) ([]byte, []Removed, error) {
 	out = append(out, data[:8]...)
 
 	var removed []Removed
+	keptOrientation := false
 	i := 8
 	for i+8 <= len(data) {
 		size := int(binary.BigEndian.Uint32(data[i : i+4]))
@@ -152,6 +181,17 @@ func scrubPNG(data []byte, stripICC bool) ([]byte, []Removed, error) {
 		end := i + 12 + size
 		if size < 0 || end > len(data) {
 			return nil, nil, fmt.Errorf("malformed PNG chunk at offset %d", i)
+		}
+
+		if name == "eXIf" && !keptOrientation {
+			if o := exifOrientation(data[i+8 : i+8+size]); o > 1 {
+				kept := pngChunkBytes("eXIf", orientationEXIF(o, 0))
+				out = append(out, kept...)
+				removed = append(removed, Removed{Name: exifOrientationKept, Bytes: end - i - len(kept)})
+				keptOrientation = true
+				i = end
+				continue
+			}
 		}
 
 		if label, drop := pngChunk(name, data[i+8:i+8+size], stripICC); drop {
@@ -173,6 +213,13 @@ func scrubPNG(data []byte, stripICC bool) ([]byte, []Removed, error) {
 	}
 
 	return out, removed, nil
+}
+
+func pngChunkBytes(name string, payload []byte) []byte {
+	out := binary.BigEndian.AppendUint32(nil, uint32(len(payload)))
+	out = append(out, name...)
+	out = append(out, payload...)
+	return binary.BigEndian.AppendUint32(out, crc32.ChecksumIEEE(out[4:]))
 }
 
 func pngChunk(name string, payload []byte, stripICC bool) (string, bool) {
@@ -202,6 +249,7 @@ func scrubWebP(data []byte, stripICC bool) ([]byte, []Removed, error) {
 	body := make([]byte, 0, len(data))
 	var removed []Removed
 	var flags byte
+	keptOrientation := false
 
 	// the RIFF header says where the image ends, anything after that was
 	// appended to the file
@@ -225,6 +273,16 @@ func scrubWebP(data []byte, stripICC bool) ([]byte, []Removed, error) {
 
 		switch {
 		case name == "EXIF":
+			payload := bytes.TrimPrefix(data[i+8:i+8+size], []byte("Exif\x00\x00"))
+			if o := exifOrientation(payload); o > 1 && !keptOrientation {
+				exif := orientationEXIF(o, 0) // even length, no padding needed
+				kept := append([]byte("EXIF"), binary.LittleEndian.AppendUint32(nil, uint32(len(exif)))...)
+				kept = append(kept, exif...)
+				body = append(body, kept...)
+				removed = append(removed, Removed{Name: exifOrientationKept, Bytes: end - i - len(kept)})
+				keptOrientation = true
+				break
+			}
 			removed = append(removed, Removed{Name: "EXIF", Bytes: end - i})
 			flags |= webpFlagEXIF
 		case name == "XMP ":
@@ -245,6 +303,9 @@ func scrubWebP(data []byte, stripICC bool) ([]byte, []Removed, error) {
 	}
 
 	// VP8X advertises which optional chunks follow, so its flags have to match
+	if keptOrientation {
+		flags &^= webpFlagEXIF
+	}
 	if flags != 0 && len(body) >= 18 && string(body[:4]) == "VP8X" {
 		body[8] &^= flags
 	}
@@ -255,4 +316,81 @@ func scrubWebP(data []byte, stripICC bool) ([]byte, []Removed, error) {
 	out = append(out, "WEBP"...)
 
 	return append(out, body...), removed, nil
+}
+
+// exifOrientationKept labels an EXIF block that was replaced by one holding
+// only the Orientation tag.
+const exifOrientationKept = "EXIF except orientation"
+
+// exifOrientation returns the Orientation tag (1-8) of a TIFF-structured
+// EXIF block, or 0 if it has none.
+func exifOrientation(tiff []byte) int {
+	if o := exifIFD0Short(tiff, tagOrientation); o >= 1 && o <= 8 {
+		return o
+	}
+	return 0
+}
+
+// exifIFD0Short returns the value of a single-value integer tag in IFD0 of
+// a TIFF-structured EXIF block, or 0 if it is missing.
+func exifIFD0Short(tiff []byte, tag uint16) int {
+	if len(tiff) < 8 {
+		return 0
+	}
+
+	var bo binary.ByteOrder
+	switch string(tiff[:2]) {
+	case "II":
+		bo = binary.LittleEndian
+	case "MM":
+		bo = binary.BigEndian
+	default:
+		return 0
+	}
+	if bo.Uint16(tiff[2:4]) != 42 {
+		return 0
+	}
+
+	r := &exifReader{tiff: tiff, bo: bo}
+	ifd0, err := r.parseIFD(bo.Uint32(tiff[4:8]))
+	if err != nil {
+		return 0
+	}
+	for _, e := range ifd0 {
+		if e.tag == tag {
+			if v := r.ints(e); len(v) == 1 && v[0] > 0 && v[0] <= 0xFFFF {
+				return int(v[0])
+			}
+		}
+	}
+	return 0
+}
+
+const (
+	tagOrientation      = 0x0112
+	tagYCbCrPositioning = 0x0213
+)
+
+// orientationEXIF builds the smallest EXIF block that still carries the
+// orientation: a TIFF header and an IFD0 with the Orientation tag. Without
+// it a photo taken in portrait shows up rotated, and the tag says nothing
+// about who took the photo or where. The EXIF spec also requires
+// YCbCrPositioning in JPEG files, it is added when ycbcr is not 0.
+func orientationEXIF(orientation, ycbcr int) []byte {
+	type field struct{ tag, value uint16 }
+	fields := []field{{tagOrientation, uint16(orientation)}}
+	if ycbcr != 0 {
+		fields = append(fields, field{tagYCbCrPositioning, uint16(ycbcr)})
+	}
+
+	out := []byte("MM\x00\x2a\x00\x00\x00\x08") // big-endian, IFD0 at offset 8
+	out = binary.BigEndian.AppendUint16(out, uint16(len(fields)))
+	for _, f := range fields { // sorted by tag, as TIFF requires
+		out = binary.BigEndian.AppendUint16(out, f.tag)
+		out = binary.BigEndian.AppendUint16(out, typeShort)
+		out = binary.BigEndian.AppendUint32(out, 1)       // count
+		out = binary.BigEndian.AppendUint16(out, f.value) // left-aligned in the 4-byte field
+		out = append(out, 0, 0)
+	}
+	return append(out, 0, 0, 0, 0) // no next IFD
 }

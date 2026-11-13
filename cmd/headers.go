@@ -19,10 +19,12 @@ var headersCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		start := time.Now()
 
-		resp, err := netutil.Get(args[0])
+		// only the headers are needed, the body is never downloaded
+		resp, err := netutil.Open(args[0])
 		if err != nil {
 			return fmt.Errorf("request failed: %w", err)
 		}
+		resp.Body.Close()
 
 		duration := time.Since(start)
 
@@ -31,8 +33,8 @@ var headersCmd = &cobra.Command{
 
 		// sorted by name, map order would change on every run
 		fmt.Println("Headers:")
-		for _, key := range slices.Sorted(maps.Keys(resp.Headers)) {
-			for _, value := range resp.Headers[key] {
+		for _, key := range slices.Sorted(maps.Keys(resp.Header)) {
+			for _, value := range resp.Header[key] {
 				fmt.Printf("  %s: %s\n", key, value)
 			}
 		}

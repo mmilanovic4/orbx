@@ -38,15 +38,21 @@ var (
 				"kg": 1,
 			},
 		},
+		// kb, mb, ... are decimal, as in the sizes the other commands print
+		// (and macOS Finder); kib, mib, ... are their binary counterparts
 		"storage": {
 			Base:  "b",
-			Order: []string{"b", "kb", "mb", "gb", "tb"},
+			Order: []string{"b", "kb", "mb", "gb", "tb", "kib", "mib", "gib", "tib"},
 			Units: map[string]float64{
-				"b":  1,
-				"kb": 1024,
-				"mb": 1024 * 1024,
-				"gb": 1024 * 1024 * 1024,
-				"tb": 1024 * 1024 * 1024 * 1024,
+				"b":   1,
+				"kb":  1e3,
+				"mb":  1e6,
+				"gb":  1e9,
+				"tb":  1e12,
+				"kib": 1 << 10,
+				"mib": 1 << 20,
+				"gib": 1 << 30,
+				"tib": 1 << 40,
 			},
 		},
 		"time": {
@@ -65,7 +71,7 @@ var (
 	tempUnits = map[string]bool{"c": true, "f": true, "k": true}
 	tempOrder = []string{"c", "f", "k"}
 	// Ordered by decreasing length to avoid prefix collisions during unit matching (e.g. "mb" matching "m")
-	allUnits = []string{"week", "day", "min", "tb", "gb", "mb", "kb", "in", "cm", "ft", "km", "mi", "ms", "oz", "lb", "kg", "b", "m", "g", "h", "s", "c", "f", "k"}
+	allUnits = []string{"week", "day", "min", "kib", "mib", "gib", "tib", "tb", "gb", "mb", "kb", "in", "cm", "ft", "km", "mi", "ms", "oz", "lb", "kg", "b", "m", "g", "h", "s", "c", "f", "k"}
 )
 
 func convertTemp(value float64, from, to string) (float64, bool) {

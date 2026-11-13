@@ -130,7 +130,7 @@ var aesKeyCmd = &cobra.Command{
 			case "32":
 				size = 32
 			default:
-				size = 32
+				return fmt.Errorf("invalid key size %q: use 16, 24 or 32 (bytes)", args[0])
 			}
 		}
 
