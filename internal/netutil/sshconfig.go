@@ -8,7 +8,7 @@ import (
 )
 
 type SSHHost struct {
-	Alias        string
+	Aliases      []string // names from one Host line that share these settings
 	HostName     string
 	User         string
 	Port         string
@@ -16,12 +16,14 @@ type SSHHost struct {
 }
 
 // ParseSSHConfig lists the hosts defined in an ssh_config file, one entry
-// per name that can be passed to ssh. Wildcard patterns such as "Host *"
-// and Match blocks only hold defaults, so they are not listed. As in ssh,
-// the first value given for a keyword wins.
+// per Host line, so "Host pi pi.local" is a single entry with two aliases.
+// A Host line without a HostName connects each alias to its own name, so
+// those aliases are listed as separate entries. Wildcard patterns such as
+// "Host *" and Match blocks only hold defaults, so they are not listed. As
+// in ssh, the first value given for a keyword wins.
 func ParseSSHConfig(data []byte) ([]SSHHost, error) {
-	var hosts []SSHHost
-	var block []int // hosts defined by the Host line being read
+	var blocks []SSHHost
+	current := -1 // index in blocks of the Host line being read, -1 for none
 
 	scanner := bufio.NewScanner(bytes.NewReader(data))
 	for scanner.Scan() {
@@ -32,22 +34,35 @@ func ParseSSHConfig(data []byte) ([]SSHHost, error) {
 
 		switch key {
 		case "host":
-			block = nil
-			for _, name := range concreteHostNames(value) {
-				hosts = append(hosts, SSHHost{Alias: name})
-				block = append(block, len(hosts)-1)
+			current = -1
+			if names := concreteHostNames(value); len(names) > 0 {
+				blocks = append(blocks, SSHHost{Aliases: names})
+				current = len(blocks) - 1
 			}
 		case "match":
-			block = nil
+			current = -1
 		default:
-			for _, i := range block {
-				setSSHOption(&hosts[i], key, value)
+			if current >= 0 {
+				setSSHOption(&blocks[current], key, value)
 			}
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
 		return nil, err
+	}
+
+	var hosts []SSHHost
+	for _, b := range blocks {
+		if b.HostName != "" || len(b.Aliases) == 1 {
+			hosts = append(hosts, b)
+			continue
+		}
+		for _, name := range b.Aliases {
+			h := b
+			h.Aliases = []string{name}
+			hosts = append(hosts, h)
+		}
 	}
 	return hosts, nil
 }
