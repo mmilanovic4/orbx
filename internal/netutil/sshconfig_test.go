@@ -27,9 +27,9 @@ Match host foo
 Host web1 web2 *.internal !bad
     User www
 
-Host pi pi.local
-    HostName pi.local
-    User milos
+Host web web.lan
+    HostName 10.0.0.8
+    User deploy
 
 Host *
     ServerAliveInterval 60
@@ -43,7 +43,7 @@ Host *
 		{Aliases: []string{"web1"}, User: "www"},
 		{Aliases: []string{"web2"}, User: "www"},
 		// a HostName shared by both aliases, listed once
-		{Aliases: []string{"pi", "pi.local"}, HostName: "pi.local", User: "milos"},
+		{Aliases: []string{"web", "web.lan"}, HostName: "10.0.0.8", User: "deploy"},
 	}
 
 	hosts, err := ParseSSHConfig([]byte(config))
