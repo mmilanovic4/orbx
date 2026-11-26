@@ -27,16 +27,23 @@ Match host foo
 Host web1 web2 *.internal !bad
     User www
 
+Host pi pi.local
+    HostName pi.local
+    User milos
+
 Host *
     ServerAliveInterval 60
 `
 
 	expected := []SSHHost{
-		{Alias: "myserver", HostName: "10.0.0.5", User: "deploy"},
-		{Alias: "tabbed", HostName: "10.0.0.6", Port: "2222"},
-		{Alias: "eq", HostName: "10.0.0.7", User: "admin", IdentityFile: "~/.ssh/my key"},
-		{Alias: "web1", User: "www"},
-		{Alias: "web2", User: "www"},
+		{Aliases: []string{"myserver"}, HostName: "10.0.0.5", User: "deploy"},
+		{Aliases: []string{"tabbed"}, HostName: "10.0.0.6", Port: "2222"},
+		{Aliases: []string{"eq"}, HostName: "10.0.0.7", User: "admin", IdentityFile: "~/.ssh/my key"},
+		// no HostName, so each alias connects to a different host
+		{Aliases: []string{"web1"}, User: "www"},
+		{Aliases: []string{"web2"}, User: "www"},
+		// a HostName shared by both aliases, listed once
+		{Aliases: []string{"pi", "pi.local"}, HostName: "pi.local", User: "milos"},
 	}
 
 	hosts, err := ParseSSHConfig([]byte(config))

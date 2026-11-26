@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/mmilanovic4/orbx/internal/netutil"
 	"github.com/mmilanovic4/orbx/internal/sysutil"
@@ -12,15 +13,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// formatSSHHost shows the alias passed to ssh and where it connects,
-// e.g. "myserver → deploy@10.0.0.5:2222 (~/.ssh/id_ed25519)".
+// formatSSHHost shows the aliases passed to ssh and where they connect,
+// e.g. "myserver, myserver.lan → deploy@10.0.0.5:2222 (~/.ssh/id_ed25519)".
 func formatSSHHost(h netutil.SSHHost) string {
-	s := h.Alias
+	s := strings.Join(h.Aliases, ", ")
 
 	if h.HostName != "" || h.User != "" || h.Port != "" {
 		target := h.HostName
 		if target == "" {
-			target = h.Alias
+			// only single-alias entries lack a HostName, ssh connects to the alias
+			target = h.Aliases[0]
 		}
 		if h.User != "" {
 			target = h.User + "@" + target
